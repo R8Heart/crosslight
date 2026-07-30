@@ -2,17 +2,20 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c27ou6fcr6mgi"
-path.s3tc="res://.godot/imported/handTourch_wooden+club+3d+model_basecolor.jpg-2084b10e00fa4bcf808a7357a9a13810.s3tc.ctex"
+uid="uid://nhccjbpolyso"
+path.s3tc="res://.godot/imported/hand_hand+3d+model_rm.jpg-501f16b9a546128deb71f289f02f2ca7.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
+generator_parameters={
+"md5": "2a0124e7b93c20d432d5603f835534f1"
+}
 
 [deps]
 
-source_file="res://assets/hand/handTourch_wooden+club+3d+model_basecolor.jpg"
-dest_files=["res://.godot/imported/handTourch_wooden+club+3d+model_basecolor.jpg-2084b10e00fa4bcf808a7357a9a13810.s3tc.ctex"]
+source_file="res://assets/hand/hand_hand+3d+model_rm.jpg"
+dest_files=["res://.godot/imported/hand_hand+3d+model_rm.jpg-501f16b9a546128deb71f289f02f2ca7.s3tc.ctex"]
 
 [params]
 

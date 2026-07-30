@@ -1,0 +1,53 @@
+[gd_scene format=3 uid="uid://ddq8ydtqe17px"]
+
+[ext_resource type="PackedScene" uid="uid://rkengeb7usc3" path="res://player/player.tscn" id="1_n6r34"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_kxl1t"]
+sky_top_color = Color(0.009769575, 0.014749108, 0.023307472, 1)
+sky_horizon_color = Color(0, 0.06844535, 0.17342469, 1)
+ground_bottom_color = Color(0, 0, 0, 1)
+ground_horizon_color = Color(0.10245899, 0.10541613, 0.11133724, 1)
+
+[sub_resource type="Sky" id="Sky_tm16f"]
+sky_material = SubResource("ProceduralSkyMaterial_kxl1t")
+
+[sub_resource type="Environment" id="Environment_gpve8"]
+background_mode = 2
+sky = SubResource("Sky_tm16f")
+
+[node name="EstateExterior" type="Node3D" unique_id=1660842349]
+
+[node name="Ground" type="CSGBox3D" parent="." unique_id=555769957]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+use_collision = true
+size = Vector3(500, 1, 500)
+
+[node name="Player" parent="." unique_id=116758006 instance=ExtResource("1_n6r34")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 70)
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=520066297]
+environment = SubResource("Environment_gpve8")
+
+[node name="MoonLight" type="DirectionalLight3D" parent="." unique_id=176099270]
+transform = Transform3D(0.67815965, 0.3267689, 0.6582717, 0, -0.8957118, 0.4446352, 0.7349146, -0.30153367, -0.6074356, 0, 1, 0)
+light_color = Color(0.6536873, 0.7151416, 0.8789021, 1)
+light_energy = 0.049
+shadow_enabled = true
+shadow_bias = 0.0
+shadow_opacity = 0.5
+shadow_blur = 5.097
+
+[node name="HouseBlockout" type="CSGBox3D" parent="." unique_id=1570358003]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.5, 1.5)
+use_collision = true
+size = Vector3(34, 13, 20)
+
+[node name="GateMarker" type="CSGBox3D" parent="." unique_id=2134893640]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 3.5, 60)
+use_collision = true
+size = Vector3(4, 7, 0.5)
+
+[node name="GateMarker2" type="CSGBox3D" parent="." unique_id=1604377447]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 3.5, 60)
+use_collision = true
+size = Vector3(4, 7, 0.5)

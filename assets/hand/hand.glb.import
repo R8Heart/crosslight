@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://d2aggo4t1ertu"
-path="res://.godot/imported/handTourch.glb-5cf5b80ff6d0ad911d3c2fff3bdbd5ef.scn"
+uid="uid://dnncm7hh1h0e7"
+path="res://.godot/imported/hand.glb-ed8b79d1a1de31fafa7f6d0c31e7cb9c.scn"
 
 [deps]
 
-source_file="res://assets/hand/handTourch.glb"
-dest_files=["res://.godot/imported/handTourch.glb-5cf5b80ff6d0ad911d3c2fff3bdbd5ef.scn"]
+source_file="res://assets/hand/hand.glb"
+dest_files=["res://.godot/imported/hand.glb-ed8b79d1a1de31fafa7f6d0c31e7cb9c.scn"]
 
 [params]
 

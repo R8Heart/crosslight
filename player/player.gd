@@ -6,12 +6,25 @@ const GRAVITY := 9.8
 const MOUSE_SENSITIVITY := 0.0025
 const PITCH_LIMIT := 1.4
 
+## How far the viewmodel swings while walking, in metres — kept small, this
+## is meant to read as "alive", not a cartoonish wobble.
+const BOB_AMOUNT := Vector3(0.012, 0.018, 0.0)
+## Steps per second at full SPEED; scales down with actual speed so bobbing
+## stops cleanly rather than freezing mid-swing.
+const BOB_FREQUENCY := 1.8
+## Slow idle drift when standing still, so the hand never looks frozen.
+const IDLE_SWAY_AMOUNT := 0.005
+const IDLE_SWAY_SPEED := 0.5
+const VIEWMODEL_SMOOTH := 9.0
+
 @onready var head: Node3D = $Head
 @onready var interact_ray: RayCast3D = $Head/Camera3D/InteractRay
 @onready var hold_point: Marker3D = $Head/Camera3D/HoldPoint
 @onready var interact_hint: Label = $HUD/InteractHint
+@onready var viewmodel_pivot: Node3D = $Head/Camera3D/ViewmodelPivot
 
 var held_item: Node = null
+var _bob_time := 0.0
 
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
@@ -43,6 +56,34 @@ func _physics_process(delta: float) -> void:
 
 	move_and_slide()
 	_update_interact_hint()
+	_update_viewmodel(delta)
+
+## Purely cosmetic viewmodel motion: a walk-cycle bob while moving, falling
+## back to a slow idle sway at rest so the hand never looks frozen. Wall
+## clipping is handled by the player's own collision shape now, not here —
+## none of this touches the tuned rest transform on HandModel itself, it's
+## just a small offset applied to its parent pivot.
+func _update_viewmodel(delta: float) -> void:
+	var speed := Vector2(velocity.x, velocity.z).length()
+	var moving := speed > 0.1 and is_on_floor()
+
+	var offset: Vector3
+	if moving:
+		_bob_time += delta * BOB_FREQUENCY * TAU * (speed / SPEED)
+		offset = Vector3(
+			sin(_bob_time) * BOB_AMOUNT.x,
+			absf(sin(_bob_time)) * BOB_AMOUNT.y,
+			0.0
+		)
+	else:
+		var t := Time.get_ticks_msec() / 1000.0
+		offset = Vector3(
+			sin(t * IDLE_SWAY_SPEED) * IDLE_SWAY_AMOUNT,
+			sin(t * IDLE_SWAY_SPEED * 0.6) * IDLE_SWAY_AMOUNT * 0.6,
+			0.0
+		)
+
+	viewmodel_pivot.position = viewmodel_pivot.position.lerp(offset, delta * VIEWMODEL_SMOOTH)
 
 func _update_interact_hint() -> void:
 	interact_ray.force_raycast_update()
