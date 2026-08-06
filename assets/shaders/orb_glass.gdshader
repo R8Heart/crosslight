@@ -52,6 +52,13 @@ uniform vec3 highlight_dir = vec3(-0.4, 0.6, 0.7);
 uniform float highlight_soft_size : hint_range(1.0, 64.0) = 8.0;
 uniform float highlight_sharp_size : hint_range(1.0, 256.0) = 90.0;
 
+group_uniforms transition;
+// Driven by orb.gd during a world switch: a shell of light sweeps from the core
+// outward (`wave` is its radius) while `energy` fades it in and back out, so the
+// colour change arrives as a pulse through the orb instead of a hard cut.
+uniform float transition_wave : hint_range(0.0, 2.0) = 0.0;
+uniform float transition_energy : hint_range(0.0, 1.0) = 0.0;
+
 varying vec3 v_ray_origin;
 varying vec3 v_local_pos;
 varying vec3 v_view_normal;
@@ -122,8 +129,14 @@ void fragment() {
 		float radial = 1.0 - smoothstep(0.55, 1.0, r);
 		float d = clamp(density_base * radial * mix(0.55, 1.0, n), 0.0, 1.0);
 
+		// Expanding shell during a world switch — brightest exactly where the
+		// wavefront currently sits, so it reads as energy travelling outward
+		// rather than the whole volume just changing colour at once.
+		float shell = exp(-abs(r - transition_wave) * 7.0) * transition_energy;
+		d = clamp(d + shell * 0.6, 0.0, 1.0);
+
 		if (d > 0.01) {
-			float heat = clamp(n * radial * 1.3, 0.0, 1.0);
+			float heat = clamp(n * radial * 1.3 + shell, 0.0, 1.0);
 			vec3 col = mix(color_rim, color_mid, smoothstep(0.15, 0.5, heat));
 			col = mix(col, color_core, smoothstep(0.5, 0.9, heat));
 

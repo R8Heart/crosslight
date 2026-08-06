@@ -2,22 +2,50 @@
 
 [ext_resource type="Script" uid="uid://dqsccysw2hwub" path="res://player/player.gd" id="1"]
 [ext_resource type="Script" uid="uid://df60bhcvbmgo8" path="res://player/orb.gd" id="2"]
-[ext_resource type="PackedScene" uid="uid://dnncm7hh1h0e7" path="res://assets/hand/hand.glb" id="3"]
 [ext_resource type="Shader" uid="uid://d0fqnv3al2wi" path="res://assets/shaders/orb_glass.gdshader" id="4"]
 [ext_resource type="Texture2D" uid="uid://0jtatkklrse1" path="res://assets/textures/metal_normal.jpg" id="5"]
 [ext_resource type="Texture2D" uid="uid://wc1hpw8jsq1n" path="res://assets/textures/metal_roughness.jpg" id="6"]
+[ext_resource type="Script" uid="uid://bsaq06r5wcfxo" path="res://player/lantern_rig.gd" id="7"]
+[ext_resource type="PackedScene" uid="uid://ckgp7k2tcuuu3" path="res://assets/hand/lantern.glb" id="9"]
+[ext_resource type="PackedScene" uid="uid://dxigf6claiwup" path="res://assets/hand/fist.glb" id="10"]
+[ext_resource type="Shader" uid="uid://bu88u2xlodxjh" path="res://assets/shaders/world_transition.gdshader" id="11_worldfx"]
+[ext_resource type="Script" uid="uid://dpuf4dujqplc4" path="res://components/world_transition_fx.gd" id="12_worldfx"]
+[ext_resource type="Script" path="res://components/debug_overlay.gd" id="13_debug"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_debug"]
+bg_color = Color(0, 0, 0, 0.45)
+content_margin_left = 8.0
+content_margin_top = 6.0
+content_margin_right = 8.0
+content_margin_bottom = 6.0
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
 radius = 0.4
 height = 1.8
 
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_g6k8r"]
-radius = 0.335
-height = 1.3051343
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_WorldFX"]
+render_priority = 127
+shader = ExtResource("11_worldfx")
+shader_parameter/orb_uv = Vector2(0.5, 0.5)
+shader_parameter/aspect = 1.777
+shader_parameter/swirl = 0.0
+shader_parameter/darkness = 0.0
+shader_parameter/burst = 0.0
+shader_parameter/tint = Color(1, 0.6, 0.25, 1)
+shader_parameter/pull_amount = 0.85
+shader_parameter/smear_strength = 0.02
+shader_parameter/ca_strength = 0.02
+
+[sub_resource type="QuadMesh" id="QuadMesh_WorldFX"]
+size = Vector2(2, 2)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_8t03j"]
+metallic = 0.3
 
 [sub_resource type="SphereMesh" id="SphereMesh_Orb"]
-radius = 0.045
-height = 0.09
+material = SubResource("StandardMaterial3D_8t03j")
+radius = 0.15
+height = 0.29
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_Orb"]
 frequency = 0.06
@@ -54,21 +82,26 @@ shader_parameter/surface_roughness = 1.0
 shader_parameter/highlight_dir = Vector3(-0.4, 0.6, 0.7)
 shader_parameter/highlight_soft_size = 11.886000517085
 shader_parameter/highlight_sharp_size = 135.53600639046
+shader_parameter/transition_wave = 0.0
+shader_parameter/transition_energy = 0.0
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_lantern"]
+points = PackedVector3Array(-0.0012142807, 1.0077376, 0.035518344, -0.22339301, 0.08740723, -0.027892943, -0.2075169, 0.08740723, -0.059638977, 0.22096445, 0.08740723, 0.019645328, 0.12570772, 0.51580775, -0.20249611, -0.11226015, 0.15093657, 0.1942485, 0.12570772, 0.51580775, 0.1942485, -0.17576464, 0.7539185, -0.012019927, -0.11226015, 0.08740723, -0.20249611, 0.22096445, 0.51580775, -0.027892943, -0.12813628, 0.51580775, 0.1942485, -0.11226015, 0.51580775, -0.20249611, 0.07812284, -0.0077376366, 0.13075644, 0.12570772, 0.08740723, -0.20249611, 0.03049447, 1.0077376, -0.012019927, 0.10983159, 0.07159945, 0.1942485, 0.03049447, -0.0077376366, -0.13900405, -0.09642752, -0.0077376366, 0.11488342, -0.22339301, 0.51580775, -0.027892943, 0.14158383, 0.8173485, 0.019645328, -0.12813628, -0.0077376366, -0.059638977, -0.048799153, 0.9919299, -0.012019927, 0.14158383, -0.0077376366, -0.04376596, -0.22339301, 0.51580775, 0.019645328, -0.12813628, 0.07159945, 0.17837548, 0.22096445, 0.51580775, 0.019645328, -0.15988852, 0.8014413, 0.019645328, 0.10983159, 0.27789587, 0.21012151, 0.22096445, 0.08740723, -0.027892943, 0.14158383, 0.8173485, -0.012019927, -0.22339301, 0.08740723, 0.0038127005, -0.03292303, 0.9919299, 0.035518344)
 
 [node name="Player" type="CharacterBody3D" unique_id=116758006]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 1)
+wall_min_slide_angle = 0.7888888
+floor_stop_on_slope = false
+floor_block_on_wall = false
+floor_max_angle = 1.1431906
 script = ExtResource("1")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=287232140]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
 shape = SubResource("CapsuleShape3D_1")
 
-[node name="HandCollision" type="CollisionShape3D" parent="." unique_id=626546088]
-transform = Transform3D(0.9988102, -0.048669264, 0.0030770265, 0.025361657, 0.5723032, 0.81965, -0.041652765, -0.8185968, 0.5728566, 0.5964775, 1.1573342, -0.56015515)
-shape = SubResource("CapsuleShape3D_g6k8r")
-
 [node name="Head" type="Node3D" parent="." unique_id=128233384]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)
 
 [node name="Camera3D" type="Camera3D" parent="Head" unique_id=1821229651]
 current = true
@@ -79,29 +112,57 @@ target_position = Vector3(0, 0, -3)
 [node name="HoldPoint" type="Marker3D" parent="Head/Camera3D" unique_id=1671472056]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.3, -0.3, -0.6)
 
+[node name="WorldTransitionFX" type="MeshInstance3D" parent="Head/Camera3D" unique_id=1900000001]
+material_override = SubResource("ShaderMaterial_WorldFX")
+mesh = SubResource("QuadMesh_WorldFX")
+script = ExtResource("12_worldfx")
+orb_path = NodePath("../ViewmodelPivot/HandModel/LanternRig/LanternVisual/Orb")
+
 [node name="ViewmodelPivot" type="Node3D" parent="Head/Camera3D" unique_id=926874793]
 
-[node name="HandModel" parent="Head/Camera3D/ViewmodelPivot" unique_id=1766223943 instance=ExtResource("3")]
-transform = Transform3D(0.69057775, 0.030572623, -0.7226117, 0.20216708, 0.95112133, 0.23344538, 0.69442844, -0.3073005, 0.65064245, 0.555, -0.815, -0.345)
+[node name="HandModel" parent="Head/Camera3D/ViewmodelPivot" unique_id=1766223943 instance=ExtResource("10")]
+transform = Transform3D(0.057969715, 0.02109925, -0.2474254, -0.08721513, 0.23962161, 0, 0.23250382, 0.08462447, 0.061690085, 0.125, -0.08, -0.142)
 
-[node name="tripo_node_18297080-d58d-459e-bad5-992f4ba9a412" parent="Head/Camera3D/ViewmodelPivot/HandModel" index="0" unique_id=1561085806]
+[node name="tripo_node_1f408d7d-64a3-408f-9d0e-412c1ce13377" parent="Head/Camera3D/ViewmodelPivot/HandModel" index="0" unique_id=378307105]
 cast_shadow = 0
 
-[node name="Orb" type="Node3D" parent="Head/Camera3D/ViewmodelPivot/HandModel" unique_id=155136458]
-transform = Transform3D(2.4950001, 0, -1.1920929e-07, 0, 2.4950001, -5.9604645e-08, 3.5762787e-07, -2.9802322e-08, 2.495, -0.23768699, 0.8692915, -0.2250196)
+[node name="LanternRig" type="Node3D" parent="Head/Camera3D/ViewmodelPivot/HandModel" unique_id=900000001]
+transform = Transform3D(-0.007722979, -0.33866197, 0.8176022, 0, 0.81763333, 0.33867484, -0.88496625, 0.0029554563, -0.007135102, -0.34, 0.15, 0)
+script = ExtResource("7")
+
+[node name="LanternVisual" parent="Head/Camera3D/ViewmodelPivot/HandModel/LanternRig" unique_id=900000002 instance=ExtResource("9")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.9, -0.05)
+
+[node name="Orb" type="Node3D" parent="Head/Camera3D/ViewmodelPivot/HandModel/LanternRig/LanternVisual" unique_id=155136458]
+transform = Transform3D(1.2, 0, 0, 0, 1.2, 0, 0, 0, 1.2, 0, 0.38, 0)
 script = ExtResource("2")
 
-[node name="Glass" type="MeshInstance3D" parent="Head/Camera3D/ViewmodelPivot/HandModel/Orb" unique_id=15483522]
+[node name="Glass" type="MeshInstance3D" parent="Head/Camera3D/ViewmodelPivot/HandModel/LanternRig/LanternVisual/Orb" unique_id=15483522]
+transform = Transform3D(0.99999994, 1.8626451e-09, 0, -9.313226e-10, 1.0000001, 3.7252903e-09, 1.4901161e-08, 7.450581e-09, 1, -0.00021469593, -0.07186222, -0.0031383038)
+cast_shadow = 0
 mesh = SubResource("SphereMesh_Orb")
 surface_material_override/0 = SubResource("ShaderMaterial_Glass")
 
-[node name="OrbLight" type="OmniLight3D" parent="Head/Camera3D/ViewmodelPivot/HandModel/Orb" unique_id=366865229]
+[node name="OrbLight" type="OmniLight3D" parent="Head/Camera3D/ViewmodelPivot/HandModel/LanternRig/LanternVisual/Orb" unique_id=366865229]
 light_color = Color(1, 0.55, 0.15, 1)
-light_energy = 1.055
-omni_range = 6.0
-omni_attenuation = 0.55
+omni_range = 8.0
+omni_attenuation = 1.195
 
 [node name="HUD" type="CanvasLayer" parent="." unique_id=101898091]
+
+[node name="DebugOverlay" type="Label" parent="HUD" unique_id=1900000002]
+offset_left = 10.0
+offset_top = 10.0
+offset_right = 260.0
+offset_bottom = 90.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 1, 1, 0.9)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 1
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxFlat_debug")
+text = "FPS --"
+script = ExtResource("13_debug")
 
 [node name="Crosshair" type="ColorRect" parent="HUD" unique_id=2080427471]
 anchors_preset = 8
@@ -111,12 +172,10 @@ anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -2.0
 offset_top = -2.0
-offset_right = 2.0
-offset_bottom = 2.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(1, 1, 1, 0.8)
+color = Color(1, 1, 1, 0)
 
 [node name="InteractHint" type="Label" parent="HUD" unique_id=1562216471]
 visible = false
@@ -137,4 +196,10 @@ theme_override_constants/outline_size = 4
 text = "[E] Взаимодействовать"
 horizontal_alignment = 1
 
+[node name="LanternCollision" type="CollisionShape3D" parent="." unique_id=626546089]
+transform = Transform3D(0.057114847, 0, 0.17069827, 0, 0.18, 0, -0.17069827, 0, 0.057114847, 0.11255948, 2.3007114, -0.21633619)
+shape = SubResource("ConvexPolygonShape3D_lantern")
+disabled = true
+
 [editable path="Head/Camera3D/ViewmodelPivot/HandModel"]
+[editable path="Head/Camera3D/ViewmodelPivot/HandModel/LanternRig/LanternVisual"]

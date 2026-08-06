@@ -1,3 +1,14 @@
 # Godot 4+ specific ignores
 .godot/
 /android/
+perf_log.csv
+perf_log.csv.import
+perf_log.*.translation
+
+# Heavy binary assets (models, textures) -- not tracked in git, only the
+# project files that reference them. See crosslight_flag_maintenance_cost
+# memory / repo-size discussion: git kept rejecting pushes over GitHub's
+# 2GB-per-pack limit once these were included in commit history.
+# shaders/ is source code, not a binary asset, so it's the one exception.
+assets/*
+!assets/shaders/

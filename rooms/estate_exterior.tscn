@@ -1,53 +1,142 @@
 [gd_scene format=3 uid="uid://ddq8ydtqe17px"]
 
 [ext_resource type="PackedScene" uid="uid://rkengeb7usc3" path="res://player/player.tscn" id="1_n6r34"]
+[ext_resource type="Shader" uid="uid://dwyoeba1jwls5" path="res://assets/shaders/night_sky.gdshader" id="2_nightsky"]
+[ext_resource type="Texture2D" uid="uid://c6ufl6kqr2a3o" path="res://assets/textures/moon_albedo.jpg" id="3_moontex"]
+[ext_resource type="Script" uid="uid://dpfqrcn3xslnr" path="res://components/sky_controller.gd" id="4_skyctl"]
+[ext_resource type="Shader" uid="uid://l5byytfldgov" path="res://assets/shaders/ground_blend.gdshader" id="5_ground"]
+[ext_resource type="Texture2D" uid="uid://dvs3oxm53qcly" path="res://assets/ground_assets/grass/Ground037_4K-PNG_Color.png" id="10_ga"]
+[ext_resource type="Texture2D" uid="uid://dvkycmskswb5d" path="res://assets/ground_assets/grass/Ground037_4K-PNG_NormalGL.png" id="11_gn"]
+[ext_resource type="Texture2D" uid="uid://dt5ttta65hpom" path="res://assets/ground_assets/grass/Ground037_4K-PNG_Roughness.png" id="12_gr"]
+[ext_resource type="Texture2D" uid="uid://cdur4ebj5iq67" path="res://assets/ground_assets/ground_foliage/Ground040_4K-PNG_Color.png" id="13_la"]
+[ext_resource type="Texture2D" uid="uid://48av8dm1s88d" path="res://assets/ground_assets/ground_foliage/Ground040_4K-PNG_NormalGL.png" id="14_ln"]
+[ext_resource type="Texture2D" uid="uid://dyuqljqok3ug" path="res://assets/ground_assets/ground_foliage/Ground040_4K-PNG_Roughness.png" id="15_lr"]
+[ext_resource type="Texture2D" uid="uid://lof7ljxhtn6o" path="res://assets/ground_assets/ground_foliage2/Ground047_4K-PNG_Color.png" id="16_ma"]
+[ext_resource type="Texture2D" uid="uid://dfxksr4rnetbf" path="res://assets/ground_assets/ground_foliage2/Ground047_4K-PNG_NormalGL.png" id="17_mn"]
+[ext_resource type="Texture2D" uid="uid://cgnjiompkb05l" path="res://assets/ground_assets/ground_foliage2/Ground047_4K-PNG_Roughness.png" id="18_mr"]
+[ext_resource type="PackedScene" uid="uid://borkebmd5n5y2" path="res://rooms/main.scn" id="18_nk34c"]
+[ext_resource type="Texture2D" uid="uid://by4q8323xokr8" path="res://assets/ground_assets/ground_stoned/Ground039_4K-PNG_Color.png" id="19_sa"]
+[ext_resource type="Texture2D" uid="uid://dn4uavmcrcyip" path="res://assets/ground_assets/ground_stoned/Ground039_4K-PNG_NormalGL.png" id="20_sn"]
+[ext_resource type="Texture2D" uid="uid://c5e55etimp5jg" path="res://assets/ground_assets/ground_stoned/Ground039_4K-PNG_Roughness.png" id="21_sr"]
 
-[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_kxl1t"]
-sky_top_color = Color(0.009769575, 0.014749108, 0.023307472, 1)
-sky_horizon_color = Color(0, 0.06844535, 0.17342469, 1)
-ground_bottom_color = Color(0, 0, 0, 1)
-ground_horizon_color = Color(0.10245899, 0.10541613, 0.11133724, 1)
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ground"]
+render_priority = 0
+shader = ExtResource("5_ground")
+shader_parameter/grass_albedo = ExtResource("10_ga")
+shader_parameter/grass_normal = ExtResource("11_gn")
+shader_parameter/grass_rough = ExtResource("12_gr")
+shader_parameter/litter_albedo = ExtResource("13_la")
+shader_parameter/litter_normal = ExtResource("14_ln")
+shader_parameter/litter_rough = ExtResource("15_lr")
+shader_parameter/moss_albedo = ExtResource("16_ma")
+shader_parameter/moss_normal = ExtResource("17_mn")
+shader_parameter/moss_rough = ExtResource("18_mr")
+shader_parameter/stone_albedo = ExtResource("19_sa")
+shader_parameter/stone_normal = ExtResource("20_sn")
+shader_parameter/stone_rough = ExtResource("21_sr")
+shader_parameter/tile_size = 3.0
+shader_parameter/normal_strength = 1.2
+shader_parameter/patch_size = 42.0
+shader_parameter/patch_contrast = 5.0
+shader_parameter/macro_size = 130.0
+shader_parameter/macro_strength = 0.35
+shader_parameter/ground_tint = Color(1, 1, 1, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_nightsky"]
+shader = ExtResource("2_nightsky")
+shader_parameter/star_density = 1.0
+shader_parameter/star_brightness = 1.1
+shader_parameter/twinkle_speed = 2.0
+shader_parameter/sky_color = Color(0.004, 0.006, 0.013, 1)
+shader_parameter/moon_tex = ExtResource("3_moontex")
+shader_parameter/moon_angular_radius = 0.07
+shader_parameter/moon_brightness = 3.2
+shader_parameter/moon_tint = Color(0.82, 0.88, 1, 1)
+shader_parameter/moon_halo = 0.9
+shader_parameter/moon_halo_falloff = 40.0
+shader_parameter/cloud_coverage = 0.5
+shader_parameter/cloud_softness = 0.22
+shader_parameter/cloud_scale = 2.2
+shader_parameter/cloud_wind = Vector2(0.03, 0.01)
+shader_parameter/cloud_warp = 1.5
+shader_parameter/cloud_dark = Color(0.028, 0.034, 0.052, 1)
+shader_parameter/cloud_lit = Color(0.55, 0.62, 0.8, 1)
+shader_parameter/cloud_silver = 2.0
+shader_parameter/cloud_opacity = 0.8
+shader_parameter/lightning_flash = 0.0
+shader_parameter/lightning_pos = Vector2(0, 0)
+shader_parameter/lightning_color = Color(0.45, 1, 0.55, 1)
+shader_parameter/lightning_reach = 2.0
+shader_parameter/world_tint = Color(1, 1, 1, 1)
 
 [sub_resource type="Sky" id="Sky_tm16f"]
-sky_material = SubResource("ProceduralSkyMaterial_kxl1t")
+sky_material = SubResource("ShaderMaterial_nightsky")
+process_mode = 3
 
 [sub_resource type="Environment" id="Environment_gpve8"]
 background_mode = 2
 sky = SubResource("Sky_tm16f")
+ambient_light_source = 2
+ambient_light_color = Color(0.05, 0.07, 0.13, 1)
+tonemap_mode = 3
+tonemap_exposure = 1.1
+tonemap_white = 4.0
+glow_enabled = true
+glow_normalized = true
+glow_intensity = 1.3
+glow_strength = 1.2
+glow_bloom = 0.1
+glow_hdr_threshold = 2.2
+glow_hdr_scale = 1.6
+glow_hdr_luminance_cap = 0.2
+fog_enabled = true
+fog_light_color = Color(0.012, 0.017, 0.035, 1)
+fog_light_energy = 0.15
+fog_density = 0.006
+fog_aerial_perspective = 0.5
+fog_sky_affect = 0.65
+volumetric_fog_enabled = true
+volumetric_fog_density = 0.005
+volumetric_fog_albedo = Color(0.09, 0.1, 0.14, 1)
+volumetric_fog_emission_energy = 0.0
+volumetric_fog_length = 90.0
+volumetric_fog_sky_affect = 0.0
 
 [node name="EstateExterior" type="Node3D" unique_id=1660842349]
 
 [node name="Ground" type="CSGBox3D" parent="." unique_id=555769957]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
 use_collision = true
-size = Vector3(500, 1, 500)
+size = Vector3(200, 1, 200)
+material = SubResource("ShaderMaterial_ground")
 
 [node name="Player" parent="." unique_id=116758006 instance=ExtResource("1_n6r34")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 70)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 66.5)
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=520066297]
 environment = SubResource("Environment_gpve8")
 
+[node name="LightmapGI" type="LightmapGI" parent="." unique_id=686427596]
+bounces = 1
+
 [node name="MoonLight" type="DirectionalLight3D" parent="." unique_id=176099270]
-transform = Transform3D(0.67815965, 0.3267689, 0.6582717, 0, -0.8957118, 0.4446352, 0.7349146, -0.30153367, -0.6074356, 0, 1, 0)
-light_color = Color(0.6536873, 0.7151416, 0.8789021, 1)
-light_energy = 0.049
+transform = Transform3D(-0.99619466, 0.078860946, -0.03710911, 3.722281e-08, 0.4257793, 0.9048269, 0.08715581, 0.90138376, -0.4241591, 0, 1, 0)
+light_color = Color(0.62, 0.72, 0.95, 1)
+light_energy = 2.999
+light_specular = 4.518
+light_bake_mode = 1
 shadow_enabled = true
-shadow_bias = 0.0
-shadow_opacity = 0.5
-shadow_blur = 5.097
+shadow_bias = 0.03
+shadow_normal_bias = 1.5
+shadow_opacity = 0.85
+directional_shadow_split_1 = 0.232
+directional_shadow_split_2 = 0.18
+directional_shadow_split_3 = 0.45
+directional_shadow_max_distance = 80.0
+directional_shadow_pancake_size = 1024.0
 
-[node name="HouseBlockout" type="CSGBox3D" parent="." unique_id=1570358003]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.5, 1.5)
-use_collision = true
-size = Vector3(34, 13, 20)
+[node name="SkyController" type="Node" parent="." unique_id=771203914]
+script = ExtResource("4_skyctl")
 
-[node name="GateMarker" type="CSGBox3D" parent="." unique_id=2134893640]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 3.5, 60)
-use_collision = true
-size = Vector3(4, 7, 0.5)
-
-[node name="GateMarker2" type="CSGBox3D" parent="." unique_id=1604377447]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 3.5, 60)
-use_collision = true
-size = Vector3(4, 7, 0.5)
+[node name="main" parent="." unique_id=156043868 instance=ExtResource("18_nk34c")]
+transform = Transform3D(1, 0, 0, 0, 1.5, 0, 0, 0, 1, 0, 0.32, 0)

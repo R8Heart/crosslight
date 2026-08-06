@@ -24,6 +24,10 @@ WorldState="*res://autoload/world_state.gd"
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 
+[filesystem]
+
+import/blender/enabled=false
+
 [input]
 
 move_forward={
@@ -69,3 +73,21 @@ toggle_torch={
 [rendering]
 
 rendering_device/driver.windows="d3d12"
+environment/volumetric_fog/volume_size=48
+environment/volumetric_fog/volume_depth=48
+occlusion_culling/use_occlusion_culling=true
+
+[shader_globals]
+
+player_position={
+"type": "vec3",
+"value": Vector3(0, 0, 0)
+}
+player_wake={
+"type": "vec3",
+"value": Vector3(0, 0, 0)
+}
+world_fog_tint={
+"type": "vec3",
+"value": Vector3(1, 1, 1)
+}
