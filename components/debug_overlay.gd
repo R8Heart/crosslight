@@ -42,8 +42,10 @@ func _process(delta: float) -> void:
 	var phys_active := Performance.get_monitor(Performance.PHYSICS_3D_ACTIVE_OBJECTS)
 
 	if visible:
-		text = "FPS %d  (%.1f ms | phys %.1f ms)\ndraw calls %d  objects %d  prims %d\nVRAM %.0f MB  RAM %.0f MB\nnodes %d  phys active %d\n[F3] hide  [logging]" % [
-			fps, frame_ms, phys_ms, draw_calls, objects, primitives, vram_mb, ram_mb, nodes, phys_active
+		var player: Node3D = owner
+		var pos := player.global_position if player else Vector3.ZERO
+		text = "pos %.2f, %.2f, %.2f\nFPS %d  (%.1f ms | phys %.1f ms)\ndraw calls %d  objects %d  prims %d\nVRAM %.0f MB  RAM %.0f MB\nnodes %d  phys active %d\n[F3] hide  [logging]" % [
+			pos.x, pos.y, pos.z, fps, frame_ms, phys_ms, draw_calls, objects, primitives, vram_mb, ram_mb, nodes, phys_active
 		]
 
 	_log_timer += delta

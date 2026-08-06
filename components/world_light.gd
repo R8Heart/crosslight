@@ -22,19 +22,42 @@ extends Light3D
 ## brighter or dimmer on the Otherside.
 @export var otherside_energy := -1.0
 
+## Live flame flicker -- small candles/lanterns feel dead without it. On by
+## default; turn off per-instance for lights that shouldn't breathe (a
+## chandelier with many bulbs tends to average out and just read as noise).
+@export var flicker_enabled := true
+## Fraction of energy the flicker swings by, e.g. 0.12 = +/-12%.
+@export_range(0.0, 0.5) var flicker_strength := 0.12
+@export_range(0.1, 5.0) var flicker_speed := 1.0
+
 var _real_color: Color
 var _real_energy: float
+var _flicker_noise := FastNoiseLite.new()
+## Random per-instance offset so a row of candles doesn't pulse in lockstep.
+var _flicker_seed: float
 
 func _ready() -> void:
 	_real_color = light_color
 	_real_energy = light_energy
+	_flicker_seed = randf() * 1000.0
+	_flicker_noise.noise_type = FastNoiseLite.TYPE_SIMPLEX
+	_flicker_noise.frequency = 1.0
 	WorldState.world_changed.connect(_on_world_changed)
 	_apply_world(WorldState.current_world)
 
 func _process(_delta: float) -> void:
-	if WorldState.phase == WorldState.Phase.IDLE:
-		return
-	light_energy = _target_energy() * (1.0 - WorldState.darkness)
+	light_energy = _target_energy() * (1.0 - WorldState.darkness) * _flicker_multiplier()
+
+## Two layers, like a real flame: a slow organic drift (noise) for the
+## "breathing" and a quick jitter (fast sines) for the restless flicker on
+## top of it. Pure sine alone reads as a mechanical pulse, not a flame.
+func _flicker_multiplier() -> float:
+	if not flicker_enabled:
+		return 1.0
+	var t := (Time.get_ticks_msec() / 1000.0) * flicker_speed + _flicker_seed
+	var drift := _flicker_noise.get_noise_1d(t)
+	var jitter := sin(t * 11.3) * 0.35 + sin(t * 23.7) * 0.2
+	return 1.0 + (drift * 0.7 + jitter * 0.3) * flicker_strength
 
 func _target_energy() -> float:
 	if WorldState.current_world == WorldState.World.OTHERSIDE:

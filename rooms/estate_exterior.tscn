@@ -111,7 +111,7 @@ size = Vector3(200, 1, 200)
 material = SubResource("ShaderMaterial_ground")
 
 [node name="Player" parent="." unique_id=116758006 instance=ExtResource("1_n6r34")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 66.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.03468275, 0.93942285, 15.73546)
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=520066297]
 environment = SubResource("Environment_gpve8")
@@ -139,4 +139,3 @@ directional_shadow_pancake_size = 1024.0
 script = ExtResource("4_skyctl")
 
 [node name="main" parent="." unique_id=156043868 instance=ExtResource("18_nk34c")]
-transform = Transform3D(1, 0, 0, 0, 1.5, 0, 0, 0, 1, 0, 0.32, 0)
