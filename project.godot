@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Crosslight"
-run/main_scene="uid://ddq8ydtqe17px"
+run/main_scene="uid://cbtubte60nri4"
 config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://icon.svg"
 

@@ -7,7 +7,9 @@
       "Bash(timeout 30 \"/c/Users/RightHeart/Desktop/Godot_v4.7-stable_win64.exe\" --path . --script res://check_flame.gd --write-movie flame_check.avi)",
       "Bash(mkdir -p \"C:/Users/RIGHTH~1/AppData/Local/Temp/claude/c--Users-RightHeart-Desktop-crosslight/023331a7-0a79-4f0d-b82a-2b4672579259/scratchpad/metal_tex\")",
       "Bash(curl -sL -o metal009.zip \"https://ambientcg.com/get?file=Metal009_1K-JPG.zip\")",
-      "Bash(unzip -o metal009.zip)"
+      "Bash(unzip -o metal009.zip)",
+      "Bash(rm -f check_main_scene.gd check_main_scene.gd.uid check_uid.gd check_uid.gd.uid)",
+      "Bash(git fetch *)"
     ]
   }
 }
