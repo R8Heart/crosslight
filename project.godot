@@ -18,6 +18,8 @@ config/icon="res://icon.svg"
 [autoload]
 
 WorldState="*res://autoload/world_state.gd"
+ZoneManager="*res://autoload/zone_manager.gd"
+ZoneFlash="*res://autoload/zone_flash.gd"
 
 [display]
 

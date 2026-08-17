@@ -46,6 +46,7 @@ var _target_yaw := 0.0
 var _target_pitch := 0.0
 
 func _ready() -> void:
+	add_to_group(&"player")
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	WorldState.world_changed.connect(_on_world_changed)
 	_wake_pos = global_position
