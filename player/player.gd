@@ -45,10 +45,17 @@ var _wake_pos := Vector3.ZERO
 var _target_yaw := 0.0
 var _target_pitch := 0.0
 
+## Doorway ZoneTriggers are small and sit right at each threshold, so
+## spawning doesn't reliably land inside one -- state which zone the
+## player actually starts in instead of hoping an overlap check catches it.
+@export var starting_zone: StringName = &"estate"
+
 func _ready() -> void:
 	add_to_group(&"player")
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	WorldState.world_changed.connect(_on_world_changed)
+	if starting_zone != &"":
+		ZoneManager.enter_zone(starting_zone)
 	_wake_pos = global_position
 	_target_yaw = rotation.y
 	_target_pitch = head.rotation.x

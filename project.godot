@@ -19,7 +19,12 @@ config/icon="res://icon.svg"
 
 WorldState="*res://autoload/world_state.gd"
 ZoneManager="*res://autoload/zone_manager.gd"
-ZoneFlash="*res://autoload/zone_flash.gd"
+
+[debug]
+
+file_logging/enable_file_logging=true
+file_logging/log_path="user://logs/godot.log"
+file_logging/max_log_files=10
 
 [display]
 
@@ -29,6 +34,12 @@ window/stretch/aspect="expand"
 [filesystem]
 
 import/blender/enabled=false
+
+[global_group]
+
+living_room=""
+hall=""
+estate=""
 
 [input]
 

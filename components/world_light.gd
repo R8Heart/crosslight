@@ -30,6 +30,13 @@ extends Light3D
 @export_range(0.0, 0.5) var flicker_strength := 0.12
 @export_range(0.1, 5.0) var flicker_speed := 1.0
 
+## Zone-culling multiplier, owned by ZoneManager. Deliberately a separate
+## factor rather than something that writes light_energy directly: _process
+## below rewrites light_energy from scratch every single frame, so anything
+## tweening light_energy itself gets stomped 60x a second -- that fight is
+## exactly what made zone fade-ins strobe instead of fade.
+var zone_dim := 1.0
+
 var _real_color: Color
 var _real_energy: float
 var _flicker_noise := FastNoiseLite.new()
@@ -46,7 +53,7 @@ func _ready() -> void:
 	_apply_world(WorldState.current_world)
 
 func _process(_delta: float) -> void:
-	light_energy = _target_energy() * (1.0 - WorldState.darkness) * _flicker_multiplier()
+	light_energy = _target_energy() * (1.0 - WorldState.darkness) * _flicker_multiplier() * zone_dim
 
 ## Two layers, like a real flame: a slow organic drift (noise) for the
 ## "breathing" and a quick jitter (fast sines) for the restless flicker on
@@ -68,7 +75,7 @@ func _target_energy() -> float:
 ## here would be invisible at best and would fight the dimming at worst.
 func _apply_world(world) -> void:
 	light_color = _real_color if world == WorldState.World.REAL else otherside_color
-	light_energy = _target_energy() * (1.0 - WorldState.darkness)
+	light_energy = _target_energy() * (1.0 - WorldState.darkness) * zone_dim
 
 func _on_world_changed(new_world) -> void:
 	_apply_world(new_world)
