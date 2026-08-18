@@ -23,7 +23,6 @@ ZoneManager="*res://autoload/zone_manager.gd"
 [debug]
 
 file_logging/enable_file_logging=true
-file_logging/log_path="user://logs/godot.log"
 file_logging/max_log_files=10
 
 [display]

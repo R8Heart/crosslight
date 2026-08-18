@@ -9,6 +9,7 @@ Assets under CC0 / Public Domain (ambientCG textures, Poly Haven) are **not** li
 | Asset | Author | License | Source | Used for |
 |---|---|---|---|---|
 | Moon texture (`assets/textures/moon_albedo.jpg`) | Solar System Scope | CC BY 4.0 | [solarsystemscope.com/textures](https://www.solarsystemscope.com/textures/) | Moon disc in `night_sky.gdshader` |
+| Spatial Fire Raymarched v2.0 | Dari0us | CC0 (page) / MIT (repo) | [godotshaders.com](https://godotshaders.com/shader/spatial-fire-raymarched/) · [GitHub](https://github.com/Dari0us/Godot-Spatial-Fire-Raymarched) | Volumetric flame algorithm in `assets/shaders/fire_volume.gdshader` — neither licence obliges attribution, listed anyway since it is the whole fire effect rather than a snippet |
 
 ## Pending — approved for use, not yet imported into the project
 

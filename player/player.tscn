@@ -34,6 +34,7 @@ size = Vector2(2, 2)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_8t03j"]
 metallic = 0.3
+disable_receive_shadows = true
 
 [sub_resource type="SphereMesh" id="SphereMesh_Orb"]
 material = SubResource("StandardMaterial3D_8t03j")
@@ -145,7 +146,6 @@ surface_material_override/0 = SubResource("ShaderMaterial_Glass")
 
 [node name="OrbLight" type="OmniLight3D" parent="Head/Camera3D/ViewmodelPivot/HandModel/LanternRig/LanternVisual/Orb" unique_id=366865229]
 light_color = Color(1, 0.55, 0.15, 1)
-light_energy = 1.0
 light_indirect_energy = 0.6
 light_specular = 0.15
 omni_range = 6.5

@@ -40,6 +40,15 @@ func _ready() -> void:
 	for trigger in get_tree().get_nodes_in_group(&"zone_triggers"):
 		known_zones[trigger.zone_id] = true
 	for zone_id in known_zones:
+		# Never darken the zone the player is already standing in. This
+		# method has to await a frame before the scene tree is populated
+		# enough to walk, and Player._ready() gets to run inside that gap
+		# and enter its starting zone -- so by the time we resume, the
+		# starting zone may already be lit, and blanket-darkening here
+		# would switch it straight back off with nothing left to switch it
+		# on again until the player leaves the zone and comes back.
+		if zone_id == current_zone:
+			continue
 		for node in _find_dimmables(zone_id):
 			_set_dark_immediately(node)
 
@@ -71,8 +80,14 @@ func _set_zone_lit(zone_id: StringName, lit: bool) -> void:
 func _find_dimmables(zone_id: StringName) -> Array:
 	var found: Array = []
 	var visited := 0
+	# Tagging both a room's root *and* its individual lights with the zone
+	# group is normal and convenient, but it means a light gets reached
+	# twice -- once directly, once by walking down from the root. Left
+	# duplicated, each one would be faded twice with two different random
+	# stagger delays, the second call killing the first one's tween.
+	var seen: Dictionary = {}
 	for node in get_tree().get_nodes_in_group(zone_id):
-		visited += _collect(node, found)
+		visited += _collect(node, found, seen)
 
 	if visited > SUSPICIOUS_NODE_COUNT:
 		push_warning(
@@ -85,27 +100,33 @@ func _find_dimmables(zone_id: StringName) -> Array:
 ## several (e.g. "lights2") -- handle both without caring which. Returns
 ## the number of nodes visited, purely so callers can flag an abnormally
 ## large walk.
-func _collect(node: Node, out: Array) -> int:
+func _collect(node: Node, out: Array, seen: Dictionary) -> int:
 	var count := 1
-	if node is Light3D or node is WorldEmissive:
+	if (node is Light3D or _uses_zone_dim(node)) and not seen.has(node):
+		seen[node] = true
 		out.append(node)
 	for child in node.get_children():
-		count += _collect(child, out)
+		count += _collect(child, out, seen)
 	return count
 
-## Which property carries this fixture's "how lit am I" value. WorldLight
-## and WorldEmissive both recompute their real brightness from scratch
-## every frame (flicker, world-switch dimming), so writing light_energy /
-## emission directly on those gets overwritten 60x a second and strobes
-## instead of fading -- they expose a dedicated zone_dim factor to drive
-## instead. Plain Light3Ds have no such _process and take light_energy.
+## Components that recompute their own real brightness every frame --
+## flame flicker, world-switch dimming, particle simulation -- and so
+## expose a dedicated zone_dim factor for this system to drive. Writing
+## their final brightness directly instead would just get overwritten 60x
+## a second and strobe rather than fade. **Add new dimmable component
+## types here**; that is the only place this list is spelled out.
+func _uses_zone_dim(node: Node) -> bool:
+	return node is WorldLight or node is WorldEmissive or node is FireplaceFire
+
+## Which property carries this fixture's "how lit am I" value. Plain
+## Light3Ds have no per-frame writer of their own and take light_energy.
 func _dim_property(node: Node) -> String:
-	if node is WorldLight or node is WorldEmissive:
+	if _uses_zone_dim(node):
 		return "zone_dim"
 	return "light_energy"
 
 func _lit_value(node: Node) -> float:
-	if node is WorldLight or node is WorldEmissive:
+	if _uses_zone_dim(node):
 		return 1.0
 	if not _original_energy.has(node):
 		_original_energy[node] = (node as Light3D).light_energy
