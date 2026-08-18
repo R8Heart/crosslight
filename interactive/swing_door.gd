@@ -23,8 +23,39 @@ signal opened
 ## since the linked leaf is moved directly, not via its own interact()).
 @export var linked_doors: Array[NodePath] = []
 
+## One creak per state change (open AND close draw from the same pool --
+## nothing here distinguishes direction, just varies the sound). Each leaf
+## of a double door has its own player and picks independently, so the two
+## halves creak with different clips rather than one sound doubled.
+@export var door_sounds: Array[AudioStream] = [
+	preload("res://assets/audio/doors/door_01.wav"),
+	preload("res://assets/audio/doors/door_02.wav"),
+	preload("res://assets/audio/doors/door_03.wav"),
+	preload("res://assets/audio/doors/door_04.wav"),
+	preload("res://assets/audio/doors/door_05.wav"),
+	preload("res://assets/audio/doors/door_06.wav"),
+	preload("res://assets/audio/doors/door_07.wav"),
+	preload("res://assets/audio/doors/door_08.wav"),
+	preload("res://assets/audio/doors/door_09.wav"),
+]
+## 3D so a creak elsewhere in the house is audible-but-distant rather than
+## uniformly loud everywhere -- unlike the player's own footsteps, a door
+## isn't always at the listener.
+@export var sound_max_distance := 15.0
+@export var sound_unit_size := 2.0
+
 var _is_open := false
 var _tween: Tween
+var _audio: AudioStreamPlayer3D
+var _last_sound_index := -1
+
+func _ready() -> void:
+	if door_sounds.is_empty():
+		return
+	_audio = AudioStreamPlayer3D.new()
+	_audio.max_distance = sound_max_distance
+	_audio.unit_size = sound_unit_size
+	add_child(_audio)
 
 func interact(_player) -> void:
 	_set_state(not _is_open)
@@ -41,5 +72,17 @@ func _set_state(open: bool) -> void:
 	_tween = create_tween()
 	_tween.tween_property(self, "rotation_degrees:y", target, duration) \
 		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	_play_door_sound()
 	if _is_open:
 		opened.emit()
+
+func _play_door_sound() -> void:
+	if door_sounds.is_empty() or not _audio:
+		return
+	var idx := randi() % door_sounds.size()
+	if door_sounds.size() > 1 and idx == _last_sound_index:
+		idx = (idx + 1) % door_sounds.size()
+	_last_sound_index = idx
+	_audio.stream = door_sounds[idx]
+	_audio.pitch_scale = randf_range(0.95, 1.05)
+	_audio.play()

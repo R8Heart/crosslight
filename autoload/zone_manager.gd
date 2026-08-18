@@ -31,10 +31,8 @@ var current_zone: StringName = &""
 
 var _original_energy: Dictionary = {} # plain Light3D -> float
 var _active_tweens: Dictionary = {} # Node -> Tween
-var _debug_label: Label
 
 func _ready() -> void:
-	_setup_debug_label()
 	await get_tree().process_frame
 	var known_zones: Dictionary = {}
 	for trigger in get_tree().get_nodes_in_group(&"zone_triggers"):
@@ -61,7 +59,6 @@ func enter_zone(zone_id: StringName) -> void:
 	print("[ZONE] enter_zone: '%s' -> '%s'" % [current_zone, zone_id])
 	var previous := current_zone
 	current_zone = zone_id
-	_update_debug_label()
 	_set_zone_lit(zone_id, true)
 	if previous != &"":
 		_set_zone_lit(previous, false)
@@ -116,7 +113,7 @@ func _collect(node: Node, out: Array, seen: Dictionary) -> int:
 ## a second and strobe rather than fade. **Add new dimmable component
 ## types here**; that is the only place this list is spelled out.
 func _uses_zone_dim(node: Node) -> bool:
-	return node is WorldLight or node is WorldEmissive or node is FireplaceFire
+	return node is WorldLight or node is WorldEmissive or node is FireSparks
 
 ## Which property carries this fixture's "how lit am I" value. Plain
 ## Light3Ds have no per-frame writer of their own and take light_energy.
@@ -171,22 +168,3 @@ func _fade(node: Node, lit: bool, delay: float = 0.0) -> void:
 
 	if not lit and light:
 		tween.tween_callback(func(): light.visible = false)
-
-## Plain on-screen readout, not gameplay UI -- just so the current zone is
-## visible at a glance while testing instead of only living in the log.
-func _setup_debug_label() -> void:
-	var layer := CanvasLayer.new()
-	layer.layer = 100
-	_debug_label = Label.new()
-	_debug_label.position = Vector2(16, 16)
-	_debug_label.add_theme_font_size_override("font_size", 20)
-	_debug_label.add_theme_color_override("font_color", Color(1.0, 0.95, 0.6))
-	_debug_label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.9))
-	_debug_label.add_theme_constant_override("shadow_offset_x", 1)
-	_debug_label.add_theme_constant_override("shadow_offset_y", 1)
-	layer.add_child(_debug_label)
-	add_child(layer)
-	_update_debug_label()
-
-func _update_debug_label() -> void:
-	_debug_label.text = "Zone: %s" % (current_zone if current_zone != &"" else "(none)")

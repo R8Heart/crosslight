@@ -30,6 +30,40 @@ const WAVE_END := 1.4
 const FLICKER_AMOUNT := 0.2
 const FLICKER_SPEED := 3.0
 
+## The orb as a detector: it destabilises as you near a WorldPassable spot
+## instead of a separate screen-space effect, since it's already the one
+## thing on screen that visibly reacts to the world being wrong (see the
+## transition surge above). _proximity is 0 far from any passable spot,
+## 1 standing right on top of one.
+##
+## Wide detection range on purpose, paired with a square-rooted response
+## curve (see _update_proximity) -- a linear ramp over a short range means
+## almost nothing happens until you're nearly touching the spot, which is
+## the "barely reacts" problem this replaced. Square-rooting a wide range
+## front-loads the reaction: it's already well underway by the midpoint
+## of the approach instead of saving it all for the last step.
+const PROXIMITY_RANGE := 8.0
+const PROXIMITY_SEARCH_INTERVAL := 0.15
+## How much faster the glass's internal churn runs at maximum proximity.
+const PROXIMITY_SWIRL_BOOST := 4.5
+const PROXIMITY_WARP_BOOST := 2.2
+## Random force added to the orb's own physical roll (see _update_roll) at
+## maximum proximity -- it starts genuinely rattling around inside the
+## cage and slamming the wall, on top of whatever the lantern itself is
+## doing, rather than just a lighting effect.
+const PROXIMITY_CHAOS_FORCE := 12.0
+
+## Binary on/off blink rather than a smooth dip. Everything here stays
+## fast -- the previous version let the off-phase stretch to 0.6s, which
+## reads as isolated blips with a pause between them (Morse code) rather
+## than panic. A real strobe means BOTH phases short; only their ratio
+## shifts with proximity, from "mostly lit with quick stutters" to
+## "mostly dark with quick flashes", never slow either way.
+const BLINK_ON_MAX := 0.3
+const BLINK_ON_MIN := 0.02
+const BLINK_OFF_MIN := 0.04
+const BLINK_OFF_MAX := 0.09
+
 ## The orb is a loose ball rattling around inside the lantern's cage, not
 ## glued to it: gravity constantly pulls it toward whatever is "down" in the
 ## lantern's own current tilt, the lantern's slide (see lantern_rig.gd) kicks
@@ -70,6 +104,21 @@ var _wave := 0.0
 ## editor survives — an earlier version overwrote it every frame instead.
 var _base_energy := 1.0
 var _base_glow := 2.2
+var _base_swirl_speed := 0.6
+var _base_warp_strength := 0.8
+
+## 0 -> 1 with distance to the nearest currently-passable WorldPassable.
+var _proximity := 0.0
+var _proximity_timer := 0.0
+var _nearest_passable: WorldPassable
+
+## Current blink state -- see _update_blink.
+var _blink_on := true
+var _blink_timer := 0.0
+## 0.0 or 1.0, read by both _process (light) and _update_shader_params
+## (glow) so the point light and the orb's own visible glow cut out
+## together instead of the glass staying lit while the room goes dark.
+var _blink := 1.0
 
 func _ready() -> void:
 	_noise.frequency = 1.5
@@ -80,6 +129,12 @@ func _ready() -> void:
 		var glow = _glass_mat.get_shader_parameter("glow_intensity")
 		if glow != null:
 			_base_glow = glow
+		var sw = _glass_mat.get_shader_parameter("swirl_speed")
+		if sw != null:
+			_base_swirl_speed = sw
+		var wa = _glass_mat.get_shader_parameter("warp_strength")
+		if wa != null:
+			_base_warp_strength = wa
 
 	_base_local_pos = position
 	# Orb -> LanternVisual -> LanternRig: LanternRig's own position IS its
@@ -94,15 +149,26 @@ func _ready() -> void:
 	_transition = 0.0 if WorldState.current_world == WorldState.World.REAL else 1.0
 
 func _process(delta: float) -> void:
+	var t0 := Time.get_ticks_usec()
 	_update_roll(delta)
+	var t1 := Time.get_ticks_usec()
 	_update_transition()
+	var t2 := Time.get_ticks_usec()
+	_update_proximity(delta)
+	var t3 := Time.get_ticks_usec()
+	_update_blink(delta)
+	var t4 := Time.get_ticks_usec()
 	_update_shader_params()
+	var t5 := Time.get_ticks_usec()
+	if t5 - t0 > 1500:
+		print("[ORB PERF] roll=%dus transition=%dus proximity=%dus blink=%dus shader=%dus total=%dus" \
+			% [t1 - t0, t2 - t1, t3 - t2, t4 - t3, t5 - t4, t5 - t0])
 
 	var t := Time.get_ticks_msec() / 1000.0
 	var flicker := _noise.get_noise_1d(t * FLICKER_SPEED) * FLICKER_AMOUNT
 
 	light.light_color = REAL_LIGHT.lerp(OTHER_LIGHT, _transition)
-	light.light_energy = _base_energy + flicker + SURGE_LIGHT * _surge
+	light.light_energy = (_base_energy + flicker + SURGE_LIGHT * _surge) * _blink
 
 ## The orb gets brighter exactly as the world gets darker: `_surge` tracks
 ## WorldState.darkness directly rather than running its own tween, so it is
@@ -117,6 +183,60 @@ func _update_transition() -> void:
 		_wave = (1.0 - WorldState.burst) * WAVE_END
 	else:
 		_wave = 0.0
+
+## Throttled search for the nearest passable spot (same idea as
+## ZoneManager's group scans) -- proximity doesn't need per-frame
+## precision, only the resulting distance-based intensity does.
+func _update_proximity(delta: float) -> void:
+	_proximity_timer -= delta
+	if _proximity_timer <= 0.0:
+		_proximity_timer = PROXIMITY_SEARCH_INTERVAL
+		_nearest_passable = _find_nearest_passable()
+
+	if _nearest_passable and is_instance_valid(_nearest_passable):
+		var dist := global_position.distance_to(_nearest_passable.get_effect_center())
+		var linear := clampf(1.0 - dist / PROXIMITY_RANGE, 0.0, 1.0)
+		# sqrt front-loads the response -- see the constant's comment above.
+		_proximity = sqrt(linear)
+	else:
+		_proximity = 0.0
+
+## State machine rather than a per-frame dice roll: holds fully on or
+## fully off for a randomised span, so "off" is long enough to actually
+## read as off. Both spans are re-rolled every flip, shrinking the on-span
+## and growing the off-span as proximity climbs, so the duty cycle slides
+## continuously from "rare brief stutter" to "mostly dark, flashing on"
+## without a hard mode switch anywhere.
+func _update_blink(delta: float) -> void:
+	if _proximity <= 0.001:
+		_blink_on = true
+		_blink_timer = 0.0
+		_blink = 1.0
+		return
+
+	_blink_timer -= delta
+	if _blink_timer <= 0.0:
+		_blink_on = not _blink_on
+		if _blink_on:
+			var span := lerpf(BLINK_ON_MAX, BLINK_ON_MIN, _proximity)
+			_blink_timer = randf_range(span * 0.5, span)
+		else:
+			var span := lerpf(BLINK_OFF_MIN, BLINK_OFF_MAX, _proximity)
+			_blink_timer = randf_range(span * 0.5, span)
+	_blink = 1.0 if _blink_on else 0.0
+
+func _find_nearest_passable() -> WorldPassable:
+	var best: WorldPassable = null
+	var best_dist := PROXIMITY_RANGE
+	for node in get_tree().get_nodes_in_group(&"world_passable"):
+		var wp := node as WorldPassable
+		if not wp or not wp.is_currently_passable():
+			continue
+		var d := global_position.distance_to(wp.get_effect_center())
+		if d < best_dist:
+			best_dist = d
+			best = wp
+	return best
 
 ## Continuous local "gravity" (pulling toward whatever is currently downhill
 ## inside the lantern's own tilt, per lantern_rig.gd's swing) plus a lateral
@@ -135,6 +255,14 @@ func _update_roll(delta: float) -> void:
 		var kick := ((current_rig_pos - _lag_rig_pos) * kick_amplify).limit_length(kick_clamp)
 		_velocity += kick
 
+	# Random battering on top of the lantern's own physical motion -- a new
+	# random direction every frame reads as genuine agitation rather than
+	# a push in one direction, and it's what drives the existing cage-wall
+	# bounce below into actual audible-feeling knocks as proximity climbs.
+	if _proximity > 0.001:
+		var chaos_dir := Vector3(randf_range(-1.0, 1.0), randf_range(-1.0, 1.0), randf_range(-1.0, 1.0))
+		_velocity += chaos_dir * PROXIMITY_CHAOS_FORCE * _proximity * delta
+
 	_velocity *= clampf(1.0 - roll_damping * delta, 0.0, 1.0)
 	position += _velocity * delta
 
@@ -152,9 +280,14 @@ func _update_shader_params() -> void:
 	_glass_mat.set_shader_parameter("color_core", REAL_CORE.lerp(OTHER_CORE, _transition))
 	_glass_mat.set_shader_parameter("color_mid", REAL_MID.lerp(OTHER_MID, _transition))
 	_glass_mat.set_shader_parameter("color_rim", REAL_RIM.lerp(OTHER_RIM, _transition))
-	_glass_mat.set_shader_parameter("glow_intensity", _base_glow + SURGE_GLOW * _surge)
+	# Multiplied by _blink so the orb's own glow cuts out along with the
+	# light it casts -- otherwise the glass stays lit while the room goes
+	# dark around it, which reads as broken rather than "off".
+	_glass_mat.set_shader_parameter("glow_intensity", (_base_glow + SURGE_GLOW * _surge) * _blink)
 	_glass_mat.set_shader_parameter("transition_wave", _wave)
 	_glass_mat.set_shader_parameter("transition_energy", _surge)
+	_glass_mat.set_shader_parameter("swirl_speed", _base_swirl_speed + PROXIMITY_SWIRL_BOOST * _proximity)
+	_glass_mat.set_shader_parameter("warp_strength", _base_warp_strength + PROXIMITY_WARP_BOOST * _proximity)
 
 ## Fired mid-blackout (see world_state.gd's _enter_dark): snapping instead
 ## of tweening is deliberate, the same reasoning as WorldLight/WorldEmissive

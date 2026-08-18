@@ -96,6 +96,7 @@ floor_stop_on_slope = false
 floor_block_on_wall = false
 floor_max_angle = 1.1431906
 script = ExtResource("1")
+footstep_volume_db = -25.0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=287232140]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)

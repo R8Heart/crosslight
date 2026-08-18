@@ -28,6 +28,24 @@ const VIEWMODEL_SMOOTH := 9.0
 ## a longer-lived parted channel through fog behind him (see fog_patch.gdshader).
 const WAKE_FOLLOW := 2.2
 
+## One shot per footfall, picked at random (never the same clip twice in a
+## row) and pitch-jittered slightly so a long walk doesn't sound like one
+## sample on a loop. Not spatial -- these are the player's own feet, always
+## right at the listener, so a plain 2D player is the correct tool here.
+@export var footstep_sounds: Array[AudioStream] = [
+	preload("res://assets/audio/footsteps/step_01.wav"),
+	preload("res://assets/audio/footsteps/step_02.wav"),
+	preload("res://assets/audio/footsteps/step_03.wav"),
+	preload("res://assets/audio/footsteps/step_04.wav"),
+	preload("res://assets/audio/footsteps/step_05.wav"),
+	preload("res://assets/audio/footsteps/step_06.wav"),
+]
+@export var footstep_volume_db := -4.0:
+	set(value):
+		footstep_volume_db = value
+		if _footstep_player:
+			_footstep_player.volume_db = value
+
 @onready var head: Node3D = $Head
 @onready var interact_ray: RayCast3D = $Head/Camera3D/InteractRay
 @onready var hold_point: Marker3D = $Head/Camera3D/HoldPoint
@@ -37,6 +55,8 @@ const WAKE_FOLLOW := 2.2
 var held_item: Node = null
 var _bob_time := 0.0
 var _wake_pos := Vector3.ZERO
+var _footstep_player: AudioStreamPlayer
+var _last_footstep_index := -1
 
 ## Where the mouse wants the view to be, updated instantly on every input
 ## event; the actual rotation/head.rotation.x below just chase this rather
@@ -56,6 +76,9 @@ func _ready() -> void:
 	WorldState.world_changed.connect(_on_world_changed)
 	if starting_zone != &"":
 		ZoneManager.enter_zone(starting_zone)
+	_footstep_player = AudioStreamPlayer.new()
+	_footstep_player.volume_db = footstep_volume_db
+	add_child(_footstep_player)
 	_wake_pos = global_position
 	_target_yaw = rotation.y
 	_target_pitch = head.rotation.x
@@ -118,7 +141,17 @@ func _update_viewmodel(delta: float) -> void:
 
 	var offset: Vector3
 	if moving:
+		# absf(sin(_bob_time)) peaks twice per TAU -- once per footfall,
+		# alternating feet -- so a footstep is exactly a half-period
+		# boundary of this same value. Driving the sound off the identical
+		# phase that drives the visual bob is what keeps them locked
+		# together instead of two independently-tuned timers drifting
+		# apart from each other.
+		var prev_phase := floori(_bob_time / PI)
 		_bob_time += delta * BOB_FREQUENCY * TAU * (speed / SPEED)
+		var new_phase := floori(_bob_time / PI)
+		if new_phase != prev_phase:
+			_play_footstep()
 		offset = Vector3(
 			sin(_bob_time) * BOB_AMOUNT.x,
 			absf(sin(_bob_time)) * BOB_AMOUNT.y,
@@ -133,6 +166,17 @@ func _update_viewmodel(delta: float) -> void:
 		)
 
 	viewmodel_pivot.position = viewmodel_pivot.position.lerp(offset, delta * VIEWMODEL_SMOOTH)
+
+func _play_footstep() -> void:
+	if footstep_sounds.is_empty():
+		return
+	var idx := randi() % footstep_sounds.size()
+	if footstep_sounds.size() > 1 and idx == _last_footstep_index:
+		idx = (idx + 1) % footstep_sounds.size()
+	_last_footstep_index = idx
+	_footstep_player.stream = footstep_sounds[idx]
+	_footstep_player.pitch_scale = randf_range(0.94, 1.06)
+	_footstep_player.play()
 
 func _update_interact_hint() -> void:
 	interact_ray.force_raycast_update()
