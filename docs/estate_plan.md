@@ -34,6 +34,18 @@ The wall directly behind the statue (opposite the entrance) is **not** a
 dead end — it's a door into the inner courtyard (see below). Revises the
 earlier assumption that the space behind the statue was just a backdrop.
 
+## Massing (height)
+
+Whole building is **two storeys**, except the Hall, which is
+**double-height** (no floor slab splitting it) — its "second floor" is
+the gallery/balcony landing ringing the atrium, reached by the twin
+staircases, which is already built. Every other room, including the
+wings (Music room, Kitchen) and the rear block, is normal single-storey-
+height with an actual second floor sitting on top of it — no other room
+gets a glass roof or open-to-sky ceiling. Only the courtyard has no
+floor above it, for the obvious reason (it's exterior, open to sky by
+design).
+
 ## Inner courtyard
 
 Enclosed courtyard at the center of the quadrangle, open to the sky.
@@ -46,26 +58,65 @@ visibly different between Real and Otherside).
 
 ## Ground floor
 
+Doubles as the estate's grand/parade level — see "Parade level" decision
+below. Quadrangle: hall (front) + two side wings + rear block, enclosing
+the inner courtyard.
+
 - Grand Hall — **built** (twin staircases, statue centerpiece, dome +
-  chandelier overhead)
-- Drawing room / parlor (off hall, left) — first, simplest room; teaches
-  basic world-switch
-- Orangery / conservatory (beyond drawing room) — glass + dual-world
-  lighting should look strong here
-- Dining room (off hall, right)
-- Kitchen + pantry (beyond dining room) — leads to back/servants' stairs
-- Library (side TBD once the other rooms are actually placed)
-- Study (beyond library)
-- Servants' back stairs — connects kitchen to 2nd floor, separate from
-  the grand staircase
+  chandelier overhead). Also serves as the "great hall" — no separate
+  ballroom is planned (see Status log 2026-08-18).
+- Left wing:
+  - Drawing room / parlor (off hall, left) — **built** (base blockout +
+    decor: sofa, rug, curtains, fireplace, wall shader). Also serves as
+    the reception salon — no separate upstairs salon planned.
+  - Music room (beyond drawing room, forms courtyard's left wall) — not
+    started. Roll/clavichord, sheet music — a self-playing instrument on
+    the Otherside is the intended beat; sheet music as a lore/puzzle
+    prop. Replaces the earlier Orangery idea for this slot (see Second
+    floor: the conservatory idea moved there instead, as a courtyard-
+    facing planted balcony rather than a standalone room).
+- Right wing:
+  - Dining room (off hall, right) — **built** (base blockout, no decor
+    yet). This is the everyday/family dining room (родинна їдальня, see
+    [docs/design/story_and_level.md](design/story_and_level.md)) — the
+    formal one is upstairs, see Second floor.
+  - Kitchen + pantry/comora (beyond dining room, forms courtyard's right
+    wall) — not started. Service space.
+- Rear block (closes the quadrangle, opposite the hall, across the
+  courtyard) — not started. Two clusters:
+  - Near the kitchen side: steward's office (кабінет управителя, lore/
+    notes source), servants' hall (людська), storage (комора/кладові —
+    dark/tight, candidate for a feel-your-way puzzle beat). Servants'
+    back stairs here, connecting to the 2nd floor service side,
+    separate from the grand staircase.
+  - Near the orangery side: Library, Study — quiet cluster, courtyard-
+    facing windows.
+  - Consider a second courtyard door here (in addition to the one
+    behind the hall statue) for backtracking/shortcut routing.
 
 ## Second floor
 
-- Gallery / balcony landing — **built** (top of grand staircase)
-- Master bedroom
+Private/family level. No separate great hall or salon here — the ground-
+floor Hall and Drawing room already cover that role (see Status log
+2026-08-18).
+
+- Gallery / balcony landing — **built** (top of grand staircase). Doubles
+  as the portrait gallery (портретна галерея) — ancestral portraits along
+  the balcony overlooking the hall. Priority spot for early Otherside
+  hints about death/family.
+- Courtyard-side planted balcony — replaces the earlier standalone
+  Orangery idea. A narrow walkway runs the second floor's courtyard-
+  facing perimeter, dressed with potted greenery, open to the sky over
+  the courtyard below — gets the "glass conservatory" mood without a
+  dedicated room. Extends the mini-balcony already built off the second
+  floor (the one with the Otherside ghost-passable window) all the way
+  around the courtyard side.
+- Formal dining room (парадна їдальня) — ceremonial counterpart to the
+  ground-floor everyday dining room, near the gallery.
+- Master's study (кабінет господаря)
+- Master bedroom + будуар
 - 2–3 guest bedrooms
-- Nursery — high atmosphere value, classic horror beat
-- Second study/office
+- Nursery (дитяча) — high atmosphere value, classic horror beat
 - Bathroom
 
 ## Later-game escalation areas (build last)
@@ -79,6 +130,11 @@ visibly different between Real and Otherside).
 - Front gates → courtyard (gazon/gazon2, fountain out front) → entrance —
   **built**
 - Rear garden / mausoleum — not started
+- From [docs/design/story_and_level.md](design/story_and_level.md)'s
+  outbuildings list, not yet placed: carriage house (каретний сарай),
+  stable (стайня), pond (ставок), greenhouse (теплиця, now a fully
+  separate freestanding garden structure — the interior Orangery idea
+  was cut, see Second floor).
 
 ## Build order
 
@@ -100,3 +156,30 @@ to move/resize during blockout.
 - 2026-08-06: settled on quadrangle shape — inner courtyard behind the
   hall statue, reached through a door directly opposite the entrance.
   Published a floor-plan diagram (ground floor) to visualize it.
+- 2026-08-18: Drawing room and Dining room both built (Drawing room has
+  decor, Dining room is base-only so far); neither has a door leading
+  further into its wing yet. Reconciled this doc against
+  [docs/design/story_and_level.md](design/story_and_level.md), whose
+  ground-floor/second-floor split would have put the great hall and
+  salon upstairs, separate from what's already built downstairs —
+  decided **not** to duplicate them: the built Hall + Drawing room
+  already are the parade level, second floor stays private/family-only.
+  Assigned the lore doc's remaining ground-floor rooms (steward's
+  office, servants' hall, storage, library, study) to the rear block
+  that closes the quadrangle, and its remaining second-floor rooms
+  (portrait gallery, formal dining, master's study) onto the already-
+  built gallery/balcony landing and its neighbors. Next build step:
+  door from Drawing room → next room and from Dining room → Kitchen, so
+  both wings stop dead-ending.
+- 2026-08-18 (later same day): settled the building's massing — whole
+  estate is two storeys, except the Hall, which is double-height (its
+  built gallery/balcony landing is the "second floor" there, no slab
+  splits it). Every other room, wings included, is normal single-
+  storey-height with a real second floor on top; only the courtyard has
+  no floor above it. This killed the original Orangery-behind-the-
+  drawing-room idea (a glass roof doesn't fit under a second floor).
+  Replaced it two ways: the first-floor slot behind the Drawing room is
+  now a **Music room** instead; the "glass conservatory" mood moved to
+  the **second floor** as a planted balcony running the courtyard-
+  facing perimeter (extending the mini-balcony + Otherside ghost-
+  passable window already built there), rather than a dedicated room.
