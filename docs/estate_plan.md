@@ -50,7 +50,7 @@ design).
 
 Enclosed courtyard at the center of the quadrangle, open to the sky.
 Reached only through the door behind the hall's statue. Side wings
-(drawing room/orangery on one side, dining room/kitchen on the other)
+(drawing room/music room on one side, dining room/kitchen on the other)
 form its left/right walls; a rear block (not yet designed) closes it on
 the far side. Deliberately the one space in the house with no roof —
 should be a strong beat for world-switching (moon, weather, greenery all
@@ -69,10 +69,13 @@ the inner courtyard.
   - Drawing room / parlor (off hall, left) — **built** (base blockout +
     decor: sofa, rug, curtains, fireplace, wall shader). Also serves as
     the reception salon — no separate upstairs salon planned.
-  - Music room (beyond drawing room, forms courtyard's left wall) — not
-    started. Roll/clavichord, sheet music — a self-playing instrument on
-    the Otherside is the intended beat; sheet music as a lore/puzzle
-    prop. Replaces the earlier Orangery idea for this slot (see Second
+  - Music room (beyond drawing room, forms courtyard's left wall) —
+    **built** (base blockout + furniture: grand piano, cello, armchairs,
+    piano stool, bookcase, small settee, side table, mirror, clock; rug
+    and curtains reused from the living room's stock, wallpaper still
+    to generate). A self-playing instrument on the Otherside is the
+    intended beat; sheet music as a lore/puzzle prop. Replaces the
+    earlier Orangery idea for this slot (see Second
     floor: the conservatory idea moved there instead, as a courtyard-
     facing planted balcony rather than a standalone room).
 - Right wing:
@@ -80,17 +83,22 @@ the inner courtyard.
     yet). This is the everyday/family dining room (родинна їдальня, see
     [docs/design/story_and_level.md](design/story_and_level.md)) — the
     formal one is upstairs, see Second floor.
-  - Kitchen + pantry/comora (beyond dining room, forms courtyard's right
-    wall) — not started. Service space.
+  - Kitchen (beyond dining room, forms courtyard's right wall) — not
+    started. Service space.
+  - Pantry / comora (кладова, next to the kitchen) — not started. Two
+    separate rooms rather than one combined space (rooms have been
+    coming out spacious enough to support this) — dark/tight, candidate
+    for a feel-your-way puzzle beat.
 - Rear block (closes the quadrangle, opposite the hall, across the
   courtyard) — not started. Two clusters:
   - Near the kitchen side: steward's office (кабінет управителя, lore/
-    notes source), servants' hall (людська), storage (комора/кладові —
-    dark/tight, candidate for a feel-your-way puzzle beat). Servants'
-    back stairs here, connecting to the 2nd floor service side,
-    separate from the grand staircase.
-  - Near the orangery side: Library, Study — quiet cluster, courtyard-
-    facing windows.
+    notes source), servants' hall (людська). Servants' back stairs
+    here, connecting to the 2nd floor service side, separate from the
+    grand staircase. (Storage/комора dropped from this cluster — now
+    covered by the kitchen-side Pantry above, see Status log
+    2026-08-18.)
+  - Near the music room side: Library, Study — quiet cluster,
+    courtyard-facing windows.
   - Consider a second courtyard door here (in addition to the one
     behind the hall statue) for backtracking/shortcut routing.
 
@@ -183,3 +191,20 @@ to move/resize during blockout.
   the **second floor** as a planted balcony running the courtyard-
   facing perimeter (extending the mini-balcony + Otherside ghost-
   passable window already built there), rather than a dedicated room.
+- 2026-08-18 (evening): Music room built — base blockout + furniture
+  (piano, cello, armchairs + upholstered side chairs, piano stool,
+  two bookcase options, small settee, side table, mirror, clock; new
+  assets sourced ready-made rather than generated, since precise
+  mechanical shapes like the piano/cello don't generate reliably — see
+  `assets/music_room/`). Rug and curtains reused from the living
+  room's existing stock; wallpaper texture still to generate. Left
+  wing is now Hall → Drawing room → Music room, all built. Next: the
+  right wing (Dining room → Kitchen) is the only side still dead-
+  ending.
+- 2026-08-18 (later still): split the right wing's "beyond Dining
+  room" slot into two rooms instead of one combined Kitchen+pantry —
+  Kitchen and a separate Pantry/comora next to it. Rooms have been
+  coming out spacious enough to support two. Dropped the standalone
+  storage room from the rear block's kitchen-side cluster since this
+  new Pantry now covers that need (kept the "dark/tight puzzle beat"
+  idea, just moved onto the Pantry).
