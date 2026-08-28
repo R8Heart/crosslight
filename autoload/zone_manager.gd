@@ -1,8 +1,15 @@
 extends Node
 
 ## Rooms tag their light fixtures into a Group named after the zone
-## (e.g. "hall", "living_room"). Geometry/decor is never touched, so
-## nothing ever visually disappears -- only the light itself fades out.
+## (e.g. "hall", "living_room"), and this fades those lights up/down as the
+## player moves between zones.
+##
+## It also hides whole rooms the player cannot see into -- see the "Room
+## visibility culling" block below. That is a separate concern from the
+## lighting above and only ever touches the six side rooms; an earlier
+## attempt that hid rooms indiscriminately made walls and furniture vanish
+## in plain sight, which is why the cullable set and the adjacency table are
+## both spelled out explicitly rather than inferred.
 ## Reacts only to actually crossing a zone's ZoneTrigger; there is no
 ## door-triggered pre-reveal, that added more confusion (zones lit with
 ## no way back off) than it was worth.
@@ -27,10 +34,71 @@ const MAX_STAGGER := 0.35
 ## silently hanging.
 const SUSPICIOUS_NODE_COUNT := 2000
 
+## --- Room visibility culling ---
+##
+## Measured 2026-08-28: frustum culling alone leaves one open doorway
+## rendering the entire estate behind it -- facing a wall in the kitchen is
+## 101 FPS / 421 draw calls, facing the door is 37 FPS / 1049 calls. Godot's
+## own OccluderInstance3D is the textbook fix, but it does not recognise CSG
+## geometry (godot#104883, confirmed), and the walls here are ~390 CSG nodes,
+## so that route can't be relied on. This does the same job explicitly: hide
+## whole room branches the player cannot currently be looking into.
+##
+## Only the six side rooms are ever culled. The hall, balcony and the
+## exterior are deliberately never touched -- the hall spans two floors and
+## is visible from almost everywhere, and the courtyard is visible through
+## windows from inside, so hiding either would pop geometry in view.
+##
+## Crucially this hides a room's *contents*, never its shell. Neighbouring
+## rooms share walls: one CSGBox serves as both rooms' side of the same
+## partition, and some rooms have no wall of their own where they abut the
+## next one. Hiding a whole room therefore punched visible holes through
+## into the room beyond. Furniture and decor is where the polygons actually
+## are anyway, so culling just that keeps nearly all of the saving with none
+## of the holes.
+const CULL_ROOMS := true
+
+## Child branches of a room that are safe to hide: its furniture, props and
+## decorative trim. Everything else in the room (walls, floors, ceiling,
+## windows, doors) stays drawn always, because it either forms the shell
+## the player sees from the next room, or has to stay interactive.
+const CULLABLE_BRANCHES: Array[String] = [
+	"decor",
+	"ceiling_decor",
+	"plintus_wood",
+	"plintus_vertical",
+	"lights",
+]
+
+## Which rooms stay drawn while standing in a given zone: the room itself,
+## plus whatever is genuinely visible through its doorways. Anything not
+## listed here is hidden. Rooms are a chain per wing (hall -> drawing room ->
+## music room -> card room, hall -> dining -> kitchen -> pantry), so each
+## room only ever needs its immediate neighbours.
+const ROOM_ADJACENCY := {
+	&"hall": [&"living_room", &"dining_room"],
+	&"living_room": [&"music_room"],
+	&"music_room": [&"living_room", &"card_room"],
+	&"card_room": [&"music_room"],
+	&"dining_room": [&"kitchen"],
+	&"kitchen": [&"dining_room", &"storage_room"],
+	&"storage_room": [&"kitchen"],
+	&"estate": [],
+}
+
+## Every room this system is allowed to hide. A zone missing from here (the
+## hall, the exterior) is simply never touched.
+const CULLABLE_ROOMS: Array[StringName] = [
+	&"living_room", &"music_room", &"card_room",
+	&"dining_room", &"kitchen", &"storage_room",
+]
+
 var current_zone: StringName = &""
 
 var _original_energy: Dictionary = {} # plain Light3D -> float
 var _active_tweens: Dictionary = {} # Node -> Tween
+## zone_id -> the room's root Node3D, resolved once by name on first use.
+var _room_roots: Dictionary = {}
 
 func _ready() -> void:
 	await get_tree().process_frame
@@ -49,6 +117,11 @@ func _ready() -> void:
 			continue
 		for node in _find_dimmables(zone_id):
 			_set_dark_immediately(node)
+	# Hide the rooms the player didn't start in, same as entering a zone
+	# would. Only visibility is touched -- collision and Area3D monitoring
+	# are unaffected by `visible`, so hidden rooms still have solid floors
+	# and their ZoneTriggers still fire when the player walks in.
+	_apply_room_visibility(current_zone)
 
 ## Player physically walked into this zone -- lights it and switches off
 ## whichever zone they were in before.
@@ -59,9 +132,53 @@ func enter_zone(zone_id: StringName) -> void:
 	print("[ZONE] enter_zone: '%s' -> '%s'" % [current_zone, zone_id])
 	var previous := current_zone
 	current_zone = zone_id
+	_apply_room_visibility(zone_id)
 	_set_zone_lit(zone_id, true)
 	if previous != &"":
 		_set_zone_lit(previous, false)
+
+## Shows the current room and its immediate neighbours, hides every other
+## cullable room. Runs before the light fades so a room that is about to be
+## revealed is already in the tree when its lights start coming up.
+func _apply_room_visibility(zone_id: StringName) -> void:
+	if not CULL_ROOMS:
+		return
+	var keep_visible := {zone_id: true}
+	for neighbour in ROOM_ADJACENCY.get(zone_id, []):
+		keep_visible[neighbour] = true
+
+	var shown: Array[String] = []
+	var hidden: Array[String] = []
+	for room in CULLABLE_ROOMS:
+		var root := _room_root(room)
+		if root == null:
+			continue
+		var should_show: bool = keep_visible.has(room)
+		# Only the listed content branches are toggled -- the room's shell
+		# (walls/floors/ceiling/windows/doors) is left alone, see
+		# CULLABLE_BRANCHES.
+		for branch_name in CULLABLE_BRANCHES:
+			var branch := root.get_node_or_null(branch_name) as Node3D
+			if branch and branch.visible != should_show:
+				branch.visible = should_show
+		if should_show:
+			shown.append(String(room))
+		else:
+			hidden.append(String(room))
+	print("[ZONE] room contents shown: %s | hidden: %s" % [", ".join(shown), ", ".join(hidden)])
+
+## Room roots are Node3Ds named exactly after their zone, instanced into the
+## assembled estate scene. Looked up by name rather than by group because the
+## zone groups hold light fixtures, not necessarily the room root itself.
+func _room_root(zone_id: StringName) -> Node3D:
+	if _room_roots.has(zone_id):
+		var cached = _room_roots[zone_id]
+		return cached if is_instance_valid(cached) else null
+	var found := get_tree().root.find_child(String(zone_id), true, false) as Node3D
+	if found == null:
+		push_warning("ZoneManager: no room root node named '%s' found -- that room will never be culled." % zone_id)
+	_room_roots[zone_id] = found
+	return found
 
 func _set_zone_lit(zone_id: StringName, lit: bool) -> void:
 	var nodes := _find_dimmables(zone_id)

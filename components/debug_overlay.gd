@@ -21,11 +21,18 @@ func _ready() -> void:
 	_log_file = FileAccess.open(LOG_PATH, FileAccess.WRITE)
 	if _log_file:
 		_log_file.store_line("t,pos_x,pos_y,pos_z,yaw_deg,pitch_deg,fps,frame_ms,phys_ms,draw_calls,objects,prims,vram_mb,ram_mb,nodes,phys_active,pipe_mesh,pipe_surface,pipe_draw,pipe_spec")
+	# The settings menu owns whether this is shown; F3 still toggles it
+	# in-place for a quick look without opening the menu.
+	Settings.changed.connect(_apply_setting)
+	_apply_setting()
+
+func _apply_setting() -> void:
+	visible = Settings.show_debug_overlay
 
 func _process(delta: float) -> void:
 	var f3_down := Input.is_physical_key_pressed(KEY_F3)
 	if f3_down and not _f3_was_down:
-		visible = not visible
+		Settings.set_show_debug_overlay(not Settings.show_debug_overlay)
 	_f3_was_down = f3_down
 
 	_t += delta

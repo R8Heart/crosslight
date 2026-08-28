@@ -20,10 +20,20 @@ const RESOLUTIONS: Array[Vector2i] = [
 	Vector2i(3840, 2160),
 ]
 
+## Frame-rate cap options, in the order the menu lists them. 0 = uncapped.
+## Capping is not just a courtesy to the GPU: left uncapped the engine
+## renders as fast as it possibly can at every instant, so the frame time
+## swings with whatever is on screen. Pinning it to a rate the machine can
+## actually hold everywhere trades peak numbers for a steady frame time,
+## which reads as much smoother than a figure that leaps between 30 and 135.
+const FPS_CAPS: Array[int] = [0, 24, 30, 60, 90, 120]
+
 var fullscreen := true
 var window_resolution := Vector2i(1920, 1080)
 var render_scale := 1.0
 var vsync := true
+var max_fps := 60
+var show_debug_overlay := true
 var master_volume := 1.0 # linear 0..1, converted to dB when applied
 var mouse_sensitivity := 1.0 # multiplier on top of player.gd's base sensitivity
 var invert_y := false
@@ -39,8 +49,27 @@ func _apply_all() -> void:
 	_apply_display()
 	_apply_render_scale()
 	_apply_vsync()
+	_apply_max_fps()
 	_apply_audio()
 	_apply_brightness()
+	changed.emit()
+
+## --- Frame rate cap ---
+
+func set_max_fps(value: int) -> void:
+	max_fps = value
+	_apply_max_fps()
+	_save()
+	changed.emit()
+
+func _apply_max_fps() -> void:
+	Engine.max_fps = max_fps
+
+## --- Debug overlay (read by components/debug_overlay.gd) ---
+
+func set_show_debug_overlay(value: bool) -> void:
+	show_debug_overlay = value
+	_save()
 	changed.emit()
 
 ## --- Display (fullscreen / windowed + resolution) ---
@@ -149,6 +178,8 @@ func _save() -> void:
 	cfg.set_value("display", "window_resolution", window_resolution)
 	cfg.set_value("display", "render_scale", render_scale)
 	cfg.set_value("display", "vsync", vsync)
+	cfg.set_value("display", "max_fps", max_fps)
+	cfg.set_value("debug", "show_overlay", show_debug_overlay)
 	cfg.set_value("audio", "master_volume", master_volume)
 	cfg.set_value("controls", "mouse_sensitivity", mouse_sensitivity)
 	cfg.set_value("controls", "invert_y", invert_y)
@@ -164,6 +195,8 @@ func _load() -> void:
 	window_resolution = cfg.get_value("display", "window_resolution", window_resolution)
 	render_scale = cfg.get_value("display", "render_scale", render_scale)
 	vsync = cfg.get_value("display", "vsync", vsync)
+	max_fps = cfg.get_value("display", "max_fps", max_fps)
+	show_debug_overlay = cfg.get_value("debug", "show_overlay", show_debug_overlay)
 	master_volume = cfg.get_value("audio", "master_volume", master_volume)
 	mouse_sensitivity = cfg.get_value("controls", "mouse_sensitivity", mouse_sensitivity)
 	invert_y = cfg.get_value("controls", "invert_y", invert_y)

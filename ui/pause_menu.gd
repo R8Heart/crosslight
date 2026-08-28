@@ -151,6 +151,12 @@ func _build_settings_panel() -> VBoxContainer:
 
 	box.add_child(_slider_row("Качество рендера", 50, 100, 5, Settings.set_render_scale, "render_scale", 100.0, "%d%%"))
 
+	_fps_cap_option = OptionButton.new()
+	for cap in Settings.FPS_CAPS:
+		_fps_cap_option.add_item("Без ограничения" if cap == 0 else "%d FPS" % cap)
+	_fps_cap_option.item_selected.connect(_on_fps_cap_selected)
+	box.add_child(_row("Ограничение кадров", _fps_cap_option))
+
 	var vsync_check := CheckBox.new()
 	vsync_check.text = "Вкл"
 	vsync_check.toggled.connect(func(pressed): Settings.set_vsync(pressed))
@@ -171,6 +177,12 @@ func _build_settings_panel() -> VBoxContainer:
 
 	box.add_child(_slider_row("Яркость", 50, 150, 5, Settings.set_brightness, "brightness", 100.0, "%d%%"))
 
+	var overlay_check := CheckBox.new()
+	overlay_check.text = "Вкл"
+	overlay_check.toggled.connect(func(pressed): Settings.set_show_debug_overlay(pressed))
+	box.add_child(_row("Отладочная статистика", overlay_check))
+	_overlay_check = overlay_check
+
 	var back := Button.new()
 	back.text = "Назад"
 	back.pressed.connect(_show_main_panel)
@@ -180,6 +192,8 @@ func _build_settings_panel() -> VBoxContainer:
 
 var _vsync_check: CheckBox
 var _invert_check: CheckBox
+var _overlay_check: CheckBox
+var _fps_cap_option: OptionButton
 var _sliders: Array[Dictionary] = []
 
 ## Builds one HBoxContainer with a label, an HSlider and a value label.
@@ -229,6 +243,9 @@ func _on_display_mode_selected(index: int) -> void:
 func _on_resolution_selected(index: int) -> void:
 	Settings.set_window_resolution(Settings.RESOLUTIONS[index])
 
+func _on_fps_cap_selected(index: int) -> void:
+	Settings.set_max_fps(Settings.FPS_CAPS[index])
+
 ## Pulls every control's displayed state from the current Settings values
 ## -- called once on ready, and would need re-calling if something else
 ## external ever changed Settings while the menu is closed.
@@ -239,6 +256,9 @@ func _sync_controls_to_settings() -> void:
 	_resolution_option.selected = maxi(res_index, 0)
 	_vsync_check.button_pressed = Settings.vsync
 	_invert_check.button_pressed = Settings.invert_y
+	_overlay_check.button_pressed = Settings.show_debug_overlay
+	var cap_index := Settings.FPS_CAPS.find(Settings.max_fps)
+	_fps_cap_option.selected = maxi(cap_index, 0)
 
 	for entry in _sliders:
 		var slider: HSlider = entry["slider"]
