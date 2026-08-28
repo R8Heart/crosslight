@@ -43,6 +43,7 @@ dining_room=""
 music_room=""
 kitchen=""
 storage_room=""
+card_room=""
 
 [input]
 
@@ -89,6 +90,7 @@ toggle_torch={
 [rendering]
 
 rendering_device/driver.windows="d3d12"
+textures/vram_compression/import_etc2_astc=true
 environment/volumetric_fog/volume_size=48
 environment/volumetric_fog/volume_depth=48
 occlusion_culling/use_occlusion_culling=true

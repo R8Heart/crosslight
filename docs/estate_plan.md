@@ -78,17 +78,32 @@ the inner courtyard.
     earlier Orangery idea for this slot (see Second
     floor: the conservatory idea moved there instead, as a courtyard-
     facing planted balcony rather than a standalone room).
+  - Card room (карткова кімната, beyond the Music room) — not started.
+    Wing-lengthening addition (see Status log 2026-08-23) — both wings
+    were coming out shorter than a neoclassical estate of this scale
+    should read, so each gets one more room, symmetrically. Card-
+    playing (whist etc.) fits the estate's actual 1799-1803 period,
+    unlike a Victorian-coded billiard room. Lore hook: gambling debts/
+    scandal.
 - Right wing:
   - Dining room (off hall, right) — **built** (base blockout, no decor
     yet). This is the everyday/family dining room (родинна їдальня, see
     [docs/design/story_and_level.md](design/story_and_level.md)) — the
     formal one is upstairs, see Second floor.
-  - Kitchen (beyond dining room, forms courtyard's right wall) — not
-    started. Service space.
-  - Pantry / comora (кладова, next to the kitchen) — not started. Two
-    separate rooms rather than one combined space (rooms have been
-    coming out spacious enough to support this) — dark/tight, candidate
-    for a feel-your-way puzzle beat.
+  - Kitchen (beyond dining room, forms courtyard's right wall) —
+    **built** (base blockout + furniture: cast-iron range, china
+    cabinet, copper pots, prep tables, hanging pendant lamps).
+  - Pantry / comora (кладова, next to the kitchen) — **built** (base
+    blockout, behind the kitchen's chimney breast — two separate rooms
+    rather than one combined space, per the room-splitting decision
+    below; shelving, jars, sacks, barrels). Dark/tight, candidate for a
+    feel-your-way puzzle beat.
+  - Butler's pantry (буфетна, beyond the Kitchen/Pantry) — not started.
+    Wing-lengthening addition, symmetric with the Card room on the
+    left wing (see Status log 2026-08-23). Fine china/silver/wine
+    storage, the formal link between kitchen and dining service — a
+    real period service room, not an anachronism. Lore hook: locked
+    cabinet of valuables.
 - Rear block (closes the quadrangle, opposite the hall, across the
   courtyard) — not started. Two clusters:
   - Near the kitchen side: steward's office (кабінет управителя, lore/
@@ -191,6 +206,18 @@ to move/resize during blockout.
   the **second floor** as a planted balcony running the courtyard-
   facing perimeter (extending the mini-balcony + Otherside ghost-
   passable window already built there), rather than a dedicated room.
+- 2026-08-23: Kitchen + Pantry built (base blockout + furniture),
+  closing the right wing the same way the left wing closed with the
+  Music room. **Both wings are now fully built end-to-end**, Hall
+  included. Also ran a full performance audit this session (decimated
+  ~10 oversized meshes — some reused dozens of times, like the wall
+  molding and lamp chain link — capped oversized textures at 2048px,
+  fixed an orphaned giant collider on the pantry's duplicated shelving)
+  — see project memory for the methodology if repeating this later.
+  Next: the rear block (steward's office + servants' hall + back
+  stairs near the kitchen side, Library + Study near the music room
+  side) is the only ground-floor piece left — it closes the quadrangle
+  and connects both wings.
 - 2026-08-18 (evening): Music room built — base blockout + furniture
   (piano, cello, armchairs + upholstered side chairs, piano stool,
   two bookcase options, small settee, side table, mirror, clock; new
@@ -208,3 +235,12 @@ to move/resize during blockout.
   storage room from the rear block's kitchen-side cluster since this
   new Pantry now covers that need (kept the "dark/tight puzzle beat"
   idea, just moved onto the Pantry).
+- 2026-08-23 (later): with both wings built end-to-end, judged the
+  estate/courtyard as reading smaller than a neoclassical estate of
+  this scale should — added one more room to each wing before closing
+  with the rear block, symmetrically. Kitchen+Pantry doesn't count as
+  the "extra" room here since it's one footprint split in two, not a
+  genuine extra room — both wings were actually already equal depth.
+  Picked period-correct (1799-1803, not Victorian) additions: Card
+  room (left, beyond Music room) and Butler's pantry (right, beyond
+  Kitchen/Pantry). Starting with the Card room.
