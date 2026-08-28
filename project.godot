@@ -19,6 +19,7 @@ config/icon="res://icon.svg"
 
 WorldState="*res://autoload/world_state.gd"
 ZoneManager="*res://autoload/zone_manager.gd"
+Settings="*res://autoload/settings.gd"
 
 [debug]
 
@@ -27,6 +28,7 @@ file_logging/max_log_files=10
 
 [display]
 
+window/size/mode=3
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 

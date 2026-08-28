@@ -47,6 +47,7 @@ const WAKE_FOLLOW := 2.2
 			_footstep_player.volume_db = value
 
 @onready var head: Node3D = $Head
+@onready var camera: Camera3D = $Head/Camera3D
 @onready var interact_ray: RayCast3D = $Head/Camera3D/InteractRay
 @onready var hold_point: Marker3D = $Head/Camera3D/HoldPoint
 @onready var interact_hint: Label = $HUD/InteractHint
@@ -57,6 +58,11 @@ var _bob_time := 0.0
 var _wake_pos := Vector3.ZERO
 var _footstep_player: AudioStreamPlayer
 var _last_footstep_index := -1
+
+## Built in code rather than as a scene child so this doesn't need a hand-
+## authored .tscn UI tree -- see ui/pause_menu.gd.
+const PauseMenuScript := preload("res://ui/pause_menu.gd")
+var pause_menu: CanvasLayer
 
 ## Where the mouse wants the view to be, updated instantly on every input
 ## event; the actual rotation/head.rotation.x below just chase this rather
@@ -83,6 +89,15 @@ func _ready() -> void:
 	_target_yaw = rotation.y
 	_target_pitch = head.rotation.x
 
+	pause_menu = CanvasLayer.new()
+	pause_menu.set_script(PauseMenuScript)
+	$HUD.add_child(pause_menu)
+	Settings.changed.connect(_apply_fov)
+	_apply_fov()
+
+func _apply_fov() -> void:
+	camera.fov = Settings.fov
+
 func _process(delta: float) -> void:
 	_publish_fog_globals(delta)
 	_update_look(delta)
@@ -105,12 +120,13 @@ func _publish_fog_globals(delta: float) -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-		_target_yaw -= event.relative.x * MOUSE_SENSITIVITY
-		_target_pitch -= event.relative.y * MOUSE_SENSITIVITY
+		var sens := MOUSE_SENSITIVITY * Settings.mouse_sensitivity
+		var y_sign := -1.0 if Settings.invert_y else 1.0
+		_target_yaw -= event.relative.x * sens
+		_target_pitch -= event.relative.y * sens * y_sign
 		_target_pitch = clamp(_target_pitch, -PITCH_LIMIT, PITCH_LIMIT)
 	if event.is_action_pressed("ui_cancel"):
-		var captured := Input.mouse_mode == Input.MOUSE_MODE_CAPTURED
-		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE if captured else Input.MOUSE_MODE_CAPTURED
+		pause_menu.toggle_pause()
 	if event.is_action_pressed("interact"):
 		_try_interact()
 	if event.is_action_pressed("toggle_torch"):
