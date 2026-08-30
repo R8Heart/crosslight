@@ -9,7 +9,11 @@
       "Bash(curl -sL -o metal009.zip \"https://ambientcg.com/get?file=Metal009_1K-JPG.zip\")",
       "Bash(unzip -o metal009.zip)",
       "Bash(rm -f check_main_scene.gd check_main_scene.gd.uid check_uid.gd check_uid.gd.uid)",
-      "Bash(git fetch *)"
+      "Bash(git fetch *)",
+      "Bash(\"/c/Users/RightHeart/Desktop/Godot_v4.7-stable_win64.exe\" --headless --path . --script res://tools/_tmp_check_main_scene.gd)",
+      "Bash(rm -f \"/c/Users/RightHeart/Desktop/crosslight/tools/_tmp_check_main_scene.gd\")",
+      "Bash(\"/c/Users/RightHeart/Desktop/Godot_v4.7-stable_win64.exe\" --headless --path . --script res://tools/_tmp_check_main_scene2.gd)",
+      "Bash(grep -v \"ZoneManager\\\\|push_warning\\\\|GDScript backtrace\\\\|_room_root\\\\|_apply_room_visibility\\\\|_ready\\\\|ZONE\\\\]\\\\|^$\\\\|WARNING:\\\\|at:\")"
     ]
   }
 }

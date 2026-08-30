@@ -14,7 +14,7 @@
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
 radius = 0.4
-height = 1.8
+height = 2.1983106
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_WorldFX"]
 render_priority = 127
@@ -98,11 +98,11 @@ script = ExtResource("1")
 footstep_volume_db = -25.0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=287232140]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.988501, 0)
 shape = SubResource("CapsuleShape3D_1")
 
 [node name="Head" type="Node3D" parent="." unique_id=128233384]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5013201, 0)
 
 [node name="Camera3D" type="Camera3D" parent="Head" unique_id=1821229651]
 current = true
@@ -202,7 +202,7 @@ text = "[E] Взаимодействовать"
 horizontal_alignment = 1
 
 [node name="LanternCollision" type="CollisionShape3D" parent="." unique_id=626546089]
-transform = Transform3D(0.057114847, 0, 0.17069827, 0, 0.18, 0, -0.17069827, 0, 0.057114847, 0.11255948, 2.3007114, -0.21633619)
+transform = Transform3D(0.057114847, 0, 0.17069827, 0, 0.18, 0, -0.17069827, 0, 0.057114847, 0.11255948, 2.2842417, -0.21633619)
 shape = SubResource("ConvexPolygonShape3D_lantern")
 disabled = true
 
