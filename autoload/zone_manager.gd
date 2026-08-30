@@ -93,6 +93,11 @@ const CULLABLE_ROOMS: Array[StringName] = [
 	&"dining_room", &"kitchen", &"storage_room",
 ]
 
+## Fired after a zone change is fully applied (visibility + lighting already
+## switched). components/debug_overlay.gd taps this to mark which room a
+## stretch of the perf log was recorded in.
+signal zone_entered(zone_id: StringName)
+
 var current_zone: StringName = &""
 
 var _original_energy: Dictionary = {} # plain Light3D -> float
@@ -100,28 +105,33 @@ var _active_tweens: Dictionary = {} # Node -> Tween
 ## zone_id -> the room's root Node3D, resolved once by name on first use.
 var _room_roots: Dictionary = {}
 
+## Deliberately does nothing at boot. This used to run the initial
+## darken-every-other-zone pass directly in _ready() -- but an autoload's
+## _ready() fires exactly once, at the very start of the whole app session.
+## That was fine back when the estate was itself the main scene, but once a
+## menu scene came first, this ran against the menu (zero ZoneTriggers in
+## it) and never got a second chance once the estate loaded later: every
+## light everywhere was staying at its authored brightness forever, only
+## ever actually dimming the first time a zone was live-exited during play.
+## See darken_all_except_current(), called from player.gd once the estate
+## scene (and its Player) actually exists.
 func _ready() -> void:
+	pass
+
+## Force every zone except whichever is current dark immediately, no fade.
+## Call this once, right after the player's starting zone has already been
+## entered via enter_zone() -- not before -- so the zone the player starts
+## in doesn't visibly flash to black before fading back up.
+func darken_all_except_current() -> void:
 	await get_tree().process_frame
 	var known_zones: Dictionary = {}
 	for trigger in get_tree().get_nodes_in_group(&"zone_triggers"):
 		known_zones[trigger.zone_id] = true
 	for zone_id in known_zones:
-		# Never darken the zone the player is already standing in. This
-		# method has to await a frame before the scene tree is populated
-		# enough to walk, and Player._ready() gets to run inside that gap
-		# and enter its starting zone -- so by the time we resume, the
-		# starting zone may already be lit, and blanket-darkening here
-		# would switch it straight back off with nothing left to switch it
-		# on again until the player leaves the zone and comes back.
 		if zone_id == current_zone:
 			continue
 		for node in _find_dimmables(zone_id):
 			_set_dark_immediately(node)
-	# Hide the rooms the player didn't start in, same as entering a zone
-	# would. Only visibility is touched -- collision and Area3D monitoring
-	# are unaffected by `visible`, so hidden rooms still have solid floors
-	# and their ZoneTriggers still fire when the player walks in.
-	_apply_room_visibility(current_zone)
 
 ## Player physically walked into this zone -- lights it and switches off
 ## whichever zone they were in before.
@@ -136,6 +146,7 @@ func enter_zone(zone_id: StringName) -> void:
 	_set_zone_lit(zone_id, true)
 	if previous != &"":
 		_set_zone_lit(previous, false)
+	zone_entered.emit(zone_id)
 
 ## Shows the current room and its immediate neighbours, hides every other
 ## cullable room. Runs before the light fades so a room that is about to be

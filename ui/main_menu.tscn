@@ -1,0 +1,238 @@
+[gd_scene format=3 uid="uid://e6nmo4emjs3e"]
+
+[ext_resource type="Script" uid="uid://blvfk7f0vgr62" path="res://ui/menu_hand_look.gd" id="1_ubpvv"]
+[ext_resource type="PackedScene" uid="uid://dxigf6claiwup" path="res://assets/hand/fist.glb" id="2_arv2f"]
+[ext_resource type="Script" uid="uid://bsaq06r5wcfxo" path="res://player/lantern_rig.gd" id="3_5klac"]
+[ext_resource type="PackedScene" uid="uid://ckgp7k2tcuuu3" path="res://assets/hand/lantern.glb" id="4_lsdqh"]
+[ext_resource type="Script" uid="uid://df60bhcvbmgo8" path="res://player/orb.gd" id="5_jiymt"]
+[ext_resource type="Shader" uid="uid://d0fqnv3al2wi" path="res://assets/shaders/orb_glass.gdshader" id="6_bgtsx"]
+[ext_resource type="Script" uid="uid://c6rjm7vdkhk54" path="res://components/fire_sparks.gd" id="6_jiymt"]
+[ext_resource type="Texture2D" uid="uid://0jtatkklrse1" path="res://assets/textures/metal_normal.jpg" id="7_kaxbk"]
+[ext_resource type="Texture2D" uid="uid://wc1hpw8jsq1n" path="res://assets/textures/metal_roughness.jpg" id="8_0nobx"]
+[ext_resource type="Shader" uid="uid://bhfi3u8we24ra" path="res://assets/shaders/menu_fog_overlay.gdshader" id="9_fogshader"]
+[ext_resource type="Shader" uid="uid://n1vbsp2eoglo" path="res://assets/shaders/menu_fog_volume.gdshader" id="10_fogvolume"]
+[ext_resource type="Script" uid="uid://db08nfpuubcwj" path="res://ui/main_menu.gd" id="11_mainmenu"]
+[ext_resource type="AudioStream" uid="uid://dlqq8ct7nhetx" path="res://assets/audio/Menu.mp3" id="13_bgtsx"]
+
+[sub_resource type="Environment" id="Environment_gpve8"]
+background_mode = 1
+background_color = Color(0.019607844, 0.019607844, 0.03137255, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.09, 0.13, 0.11, 1)
+ambient_light_energy = 0.7
+ssr_fade_in = 0.42426342
+ssr_fade_out = 2.7320805
+ssr_depth_tolerance = 24.91
+glow_enabled = true
+glow_bloom = 1.0
+fog_enabled = true
+fog_light_color = Color(0, 0.0627451, 0, 1)
+volumetric_fog_enabled = true
+volumetric_fog_albedo = Color(0.0051989057, 0.005198906, 0.0051989057, 1)
+volumetric_fog_emission = Color(0, 0.0016686023, 0, 1)
+adjustment_enabled = true
+adjustment_brightness = 0.88
+adjustment_contrast = 1.25
+adjustment_saturation = 0.93
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_8t03j"]
+render_priority = 1
+metallic = 0.3
+
+[sub_resource type="SphereMesh" id="SphereMesh_iyrh0"]
+material = SubResource("StandardMaterial3D_8t03j")
+radius = 0.15
+height = 0.29
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_8jgmr"]
+frequency = 0.06
+
+[sub_resource type="NoiseTexture3D" id="NoiseTexture3D_Orb"]
+width = 24
+height = 24
+depth = 24
+noise = SubResource("FastNoiseLite_8jgmr")
+seamless = true
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_q75kt"]
+render_priority = 0
+shader = ExtResource("6_bgtsx")
+shader_parameter/noise_tex = SubResource("NoiseTexture3D_Orb")
+shader_parameter/normal_tex = ExtResource("7_kaxbk")
+shader_parameter/roughness_tex = ExtResource("8_0nobx")
+shader_parameter/normal_tiling = 2.0
+shader_parameter/normal_strength = 2.0
+shader_parameter/sphere_radius = 0.045
+shader_parameter/color_core = Color(1, 0.85, 0.5, 1)
+shader_parameter/color_mid = Color(1, 0.55, 0.15, 1)
+shader_parameter/color_rim = Color(1, 0.4, 0.05, 1)
+shader_parameter/glow_intensity = 2.2
+shader_parameter/density_base = 1.1
+shader_parameter/absorption = 20.0
+shader_parameter/steps = 12
+shader_parameter/swirl_speed = 3.0
+shader_parameter/noise_scale = 8.0
+shader_parameter/warp_strength = 2.0
+shader_parameter/refraction_strength = 0.20000000298023
+shader_parameter/fresnel_power = 3.0
+shader_parameter/surface_roughness = 1.0
+shader_parameter/highlight_dir = Vector3(-0.4, 0.6, 0.7)
+shader_parameter/highlight_soft_size = 11.886000517085
+shader_parameter/highlight_sharp_size = 135.53600639046
+shader_parameter/transition_wave = 0.0
+shader_parameter/transition_energy = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_fogvolume"]
+render_priority = 1
+shader = ExtResource("10_fogvolume")
+shader_parameter/fog_color = Color(0.06, 0.13, 0.08, 1)
+shader_parameter/fog_color_bright = Color(0.2, 0.38, 0.22, 1)
+shader_parameter/density = 2.6
+shader_parameter/noise_scale = 3.0
+shader_parameter/contrast = 1.2
+shader_parameter/drift = Vector2(0.06, 0.03)
+shader_parameter/warp_strength = 1.0
+shader_parameter/edge_softness = 0.85
+shader_parameter/gradient_start = 0.15
+shader_parameter/gradient_end = 0.85
+
+[sub_resource type="QuadMesh" id="QuadMesh_fogvolume"]
+material = SubResource("ShaderMaterial_fogvolume")
+size = Vector2(1.1, 1.1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_fogvolume_dense"]
+render_priority = 2
+shader = ExtResource("10_fogvolume")
+shader_parameter/fog_color = Color(0.06, 0.13, 0.08, 1)
+shader_parameter/fog_color_bright = Color(0.2, 0.38, 0.22, 1)
+shader_parameter/density = 3.6
+shader_parameter/noise_scale = 2.2
+shader_parameter/contrast = 1.1
+shader_parameter/drift = Vector2(-0.04, 0.02)
+shader_parameter/warp_strength = 0.8
+shader_parameter/edge_softness = 0.9
+shader_parameter/gradient_start = 0.0
+shader_parameter/gradient_end = 0.55
+
+[sub_resource type="QuadMesh" id="QuadMesh_fogvolume_dense"]
+material = SubResource("ShaderMaterial_fogvolume_dense")
+size = Vector2(1.4, 1.4)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_menufog"]
+shader = ExtResource("9_fogshader")
+shader_parameter/fog_color = Color(0.03529412, 0.078431375, 0.050980393, 0.61960787)
+shader_parameter/fog_color_bright = Color(0.015686275, 0.078431375, 0.03529412, 0.46666667)
+shader_parameter/density = 0.850000040375
+shader_parameter/noise_scale = 1.6
+shader_parameter/contrast = 2.8
+shader_parameter/drift_a = Vector2(0.05, -0.015)
+shader_parameter/drift_b = Vector2(-0.035, 0.02)
+shader_parameter/warp_strength = 1.1
+shader_parameter/gradient_start = 0.15
+shader_parameter/gradient_end = 0.7
+shader_parameter/gradient_reverse = true
+shader_parameter/vertical_softness = 0.0
+
+[node name="MainMenu" type="Control" unique_id=556037263]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("11_mainmenu")
+
+[node name="ViewportBackground" type="SubViewportContainer" parent="." unique_id=429549878]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+stretch = true
+
+[node name="SubViewport" type="SubViewport" parent="ViewportBackground" unique_id=2006678411]
+handle_input_locally = false
+size = Vector2i(1152, 648)
+render_target_update_mode = 4
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="ViewportBackground/SubViewport" unique_id=214904713]
+environment = SubResource("Environment_gpve8")
+
+[node name="Camera3D" type="Camera3D" parent="ViewportBackground/SubViewport" unique_id=888852225]
+current = true
+
+[node name="handAnchor" type="Node3D" parent="ViewportBackground/SubViewport" unique_id=343825094]
+transform = Transform3D(-0.10452851, 0, 0.9945219, 0, 1, 0, -0.9945219, 0, -0.10452851, 0.49, 0.1, -0.195)
+script = ExtResource("1_ubpvv")
+
+[node name="HandModel" parent="ViewportBackground/SubViewport/handAnchor" unique_id=358143384 instance=ExtResource("2_arv2f")]
+transform = Transform3D(0.057969715, 0.02109925, -0.2474254, -0.08721513, 0.23962161, 0, 0.23250382, 0.08462447, 0.061690085, 0.125, -0.08, -0.142)
+
+[node name="LanternRig" type="Node3D" parent="ViewportBackground/SubViewport/handAnchor/HandModel" unique_id=1508557886]
+transform = Transform3D(-0.007722979, -0.33866197, 0.8176022, 0, 0.81763333, 0.33867484, -0.88496625, 0.0029554563, -0.007135102, -0.34, 0.15, 0)
+script = ExtResource("3_5klac")
+
+[node name="LanternVisual" parent="ViewportBackground/SubViewport/handAnchor/HandModel/LanternRig" unique_id=108404235 instance=ExtResource("4_lsdqh")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.9, -0.05)
+
+[node name="tripo_node_f9f5716a-0ba5-47e9-a458-76c967798b4b" parent="ViewportBackground/SubViewport/handAnchor/HandModel/LanternRig/LanternVisual" index="0" unique_id=650789914]
+cast_shadow = 0
+
+[node name="SPARKLES" type="Node3D" parent="ViewportBackground/SubViewport/handAnchor/HandModel/LanternRig/LanternVisual/tripo_node_f9f5716a-0ba5-47e9-a458-76c967798b4b/StaticBody3D" parent_id_path=PackedInt32Array(108404235, 1359734035) index="1" unique_id=1540276197]
+transform = Transform3D(0.99999917, 5.5879354e-09, 2.682209e-07, 1.1175871e-08, 0.9999984, -2.188608e-08, -4.172325e-07, -1.5366822e-08, 0.9999995, 2.0652215, 0.009465992, 1.5767788)
+script = ExtResource("6_jiymt")
+width = 6.0
+depth = 2.0
+height = 2.0
+spark_particles = 200
+intensity = 6.0
+color_mid = Color(0.12156863, 0.8509804, 0.34901962, 1)
+
+[node name="Orb" type="Node3D" parent="ViewportBackground/SubViewport/handAnchor/HandModel/LanternRig/LanternVisual" unique_id=610575471]
+transform = Transform3D(1.1999983, -5.5879354e-09, 8.940697e-08, 1.8626451e-08, 1.1999977, -6.7055225e-08, -4.172325e-07, -2.6542693e-08, 1.1999997, -0.01805234, 0.2751594, 0.017620921)
+script = ExtResource("5_jiymt")
+
+[node name="Glass" type="MeshInstance3D" parent="ViewportBackground/SubViewport/handAnchor/HandModel/LanternRig/LanternVisual/Orb" unique_id=162228627]
+process_priority = 1
+process_physics_priority = 1
+transform = Transform3D(1.0000005, -1.1175871e-08, 8.940697e-08, -3.7252903e-09, 1.0000004, 1.7695129e-08, 5.9604645e-08, 1.6298145e-08, 1.0000001, -0.00028038025, -0.09386355, -0.004099369)
+layers = 1023
+ignore_occlusion_culling = true
+mesh = SubResource("SphereMesh_iyrh0")
+surface_material_override/0 = SubResource("ShaderMaterial_q75kt")
+
+[node name="OrbLight" type="OmniLight3D" parent="ViewportBackground/SubViewport/handAnchor/HandModel/LanternRig/LanternVisual/Orb" unique_id=154463437]
+light_color = Color(1, 0.55, 0.15, 1)
+light_energy = 1.952
+light_size = 0.064
+shadow_reverse_cull_face = true
+
+[node name="FogVolume" type="MeshInstance3D" parent="ViewportBackground/SubViewport" unique_id=967268804]
+transform = Transform3D(0.96126163, 0, -0.2756375, 0, 1, 0, 0.2756375, 0, 0.96126163, 0.159, -0.235, -0.339)
+mesh = SubResource("QuadMesh_fogvolume")
+
+[node name="FogVolume2" type="MeshInstance3D" parent="ViewportBackground/SubViewport" unique_id=967268805]
+transform = Transform3D(0.9998477, 0, 0.017452406, 0, 2.13, 0, -0.017452406, 0, 0.9998477, 0.148, 0.08, -0.392)
+mesh = SubResource("QuadMesh_fogvolume")
+
+[node name="FogVolume3" type="MeshInstance3D" parent="ViewportBackground/SubViewport" unique_id=967268806]
+transform = Transform3D(0.9998477, 0, 0.017452406, 0, 2.4, 0, -0.017452406, 0, 0.9998477, 0.14, 0.05, -0.46)
+mesh = SubResource("QuadMesh_fogvolume_dense")
+
+[node name="FogOverlay" type="ColorRect" parent="." unique_id=967268803]
+material = SubResource("ShaderMaterial_menufog")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="." unique_id=1844509981]
+stream = ExtResource("13_bgtsx")
+autoplay = true
+
+[editable path="ViewportBackground/SubViewport/handAnchor/HandModel"]
+[editable path="ViewportBackground/SubViewport/handAnchor/HandModel/LanternRig/LanternVisual"]

@@ -13,6 +13,16 @@ perf_log.*.translation
 assets/*
 !assets/shaders/
 
+# Exported builds -- same problem as assets/* above, just from `godot
+# --export` instead of downloaded models. A macOS export bundle once landed
+# in a commit here at 2.7GB (Crosslight.pck alone) and was never meant to
+# be tracked -- builds are a local artifact, not project source.
+CrossLight.app/
+*.app/
+*.pck
+Crosslight.exe
+crosslight_build/
+
 # Per-branch editing workflow: main.tscn was split into sub-scenes
 # (rooms/scn/*.scn). The .tscn text versions are the "in progress editing"
 # copies -- Claude can text-edit them directly, but they're 5-6x bigger

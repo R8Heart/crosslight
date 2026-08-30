@@ -6,12 +6,20 @@ extends Node
 ## only thing that edits these values; anything else that cares about a
 ## setting either reads the property directly (mouse sensitivity, FOV are
 ## read on demand by player.gd) or reacts to the `changed` signal.
+##
+## Display confirmation/rollback (the "apply these settings? Y/N with a
+## 5s auto-revert" flow) lives in ui/settings_panel.gd, not here -- this
+## autoload just applies+saves whatever it's told, immediately.
 
 signal changed
 
 const CONFIG_PATH := "user://settings.cfg"
 
-const RESOLUTIONS: Array[Vector2i] = [
+## Preset resolution list shown in the menu. Not const: on a fresh install
+## (no settings.cfg yet) _autodetect_resolution() may insert the monitor's
+## native resolution here if it isn't already one of these presets, so the
+## player can always select their own screen's actual resolution.
+var RESOLUTIONS: Array[Vector2i] = [
 	Vector2i(1280, 720),
 	Vector2i(1366, 768),
 	Vector2i(1600, 900),
@@ -42,7 +50,10 @@ var brightness := 1.0
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	var first_run := not FileAccess.file_exists(CONFIG_PATH)
 	_load()
+	if first_run:
+		_autodetect_resolution()
 	_apply_all()
 
 func _apply_all() -> void:
@@ -53,6 +64,20 @@ func _apply_all() -> void:
 	_apply_audio()
 	_apply_brightness()
 	changed.emit()
+
+## Runs once, only on a fresh install (no settings.cfg yet). Picks the
+## monitor's native resolution as the starting point instead of the
+## hardcoded 1920x1080 default, and makes sure that resolution is
+## selectable in the menu even if it isn't one of the RESOLUTIONS presets
+## (ultrawide monitors, odd laptop panel sizes, etc).
+func _autodetect_resolution() -> void:
+	var native := DisplayServer.screen_get_size()
+	if native.x <= 0 or native.y <= 0:
+		return # Headless/unusual environment -- keep the hardcoded default.
+	window_resolution = native
+	if not RESOLUTIONS.has(native):
+		RESOLUTIONS.append(native)
+		RESOLUTIONS.sort_custom(func(a, b): return a.x < b.x)
 
 ## --- Frame rate cap ---
 
@@ -86,9 +111,17 @@ func set_window_resolution(res: Vector2i) -> void:
 	_save()
 	changed.emit()
 
+## Fullscreen uses WINDOW_MODE_EXCLUSIVE_FULLSCREEN rather than the plain
+## FULLSCREEN mode so that window_resolution actually takes effect while
+## fullscreen -- exclusive fullscreen changes the monitor's video mode
+## instead of just filling it at native res. This is most reliable on
+## Windows; other platforms may silently ignore the resolution and behave
+## like a normal fullscreen window.
 func _apply_display() -> void:
 	if fullscreen:
-		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
+		DisplayServer.window_set_size(window_resolution)
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN)
+		DisplayServer.window_set_size(window_resolution)
 	else:
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
 		DisplayServer.window_set_size(window_resolution)

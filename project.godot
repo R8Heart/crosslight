@@ -11,9 +11,13 @@ config_version=5
 [application]
 
 config/name="Crosslight"
-run/main_scene="uid://cbtubte60nri4"
+run/main_scene="uid://e6nmo4emjs3e"
 config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://icon.svg"
+
+[audio]
+
+general/3d_panning_strength=1.0
 
 [autoload]
 
@@ -46,6 +50,10 @@ music_room=""
 kitchen=""
 storage_room=""
 card_room=""
+
+[gui]
+
+theme/custom_font="res://assets/fonts/CormorantGaramond-Variable.ttf"
 
 [input]
 
@@ -84,6 +92,10 @@ toggle_torch={
 "events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":16,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":70,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
 ]
 }
+
+[navigation]
+
+3d/warnings/navmesh_edge_merge_errors=false
 
 [physics]
 

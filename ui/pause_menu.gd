@@ -12,16 +12,13 @@ extends CanvasLayer
 ## also reaching player.gd's handler that turn.
 
 var _main_panel: VBoxContainer
-var _settings_panel: VBoxContainer
-var _resolution_option: OptionButton
-var _display_mode_option: OptionButton
+var _settings_panel: SettingsPanel
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	layer = 50
 	visible = false
 	_build_ui()
-	_sync_controls_to_settings()
 
 func _input(event: InputEvent) -> void:
 	if not visible:
@@ -84,7 +81,9 @@ func _build_ui() -> void:
 	margin.add_child(root)
 
 	_main_panel = _build_main_panel()
-	_settings_panel = _build_settings_panel()
+	_settings_panel = SettingsPanel.new()
+	_settings_panel.visible = false
+	_settings_panel.back_pressed.connect(_show_main_panel)
 	root.add_child(_main_panel)
 	root.add_child(_settings_panel)
 
@@ -95,17 +94,6 @@ func _label(text: String, big := false) -> Label:
 	if big:
 		l.add_theme_font_size_override("font_size", 22)
 	return l
-
-func _row(caption: String, control: Control) -> HBoxContainer:
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 16)
-	var cap := Label.new()
-	cap.text = caption
-	cap.custom_minimum_size = Vector2(170, 0)
-	row.add_child(cap)
-	control.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	row.add_child(control)
-	return row
 
 func _build_main_panel() -> VBoxContainer:
 	var box := VBoxContainer.new()
@@ -130,140 +118,3 @@ func _build_main_panel() -> VBoxContainer:
 
 	return box
 
-func _build_settings_panel() -> VBoxContainer:
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 8)
-	box.visible = false
-
-	box.add_child(_label("НАСТРОЙКИ", true))
-
-	_display_mode_option = OptionButton.new()
-	_display_mode_option.add_item("Полноэкранный", 0)
-	_display_mode_option.add_item("Оконный", 1)
-	_display_mode_option.item_selected.connect(_on_display_mode_selected)
-	box.add_child(_row("Экран", _display_mode_option))
-
-	_resolution_option = OptionButton.new()
-	for res in Settings.RESOLUTIONS:
-		_resolution_option.add_item("%d x %d" % [res.x, res.y])
-	_resolution_option.item_selected.connect(_on_resolution_selected)
-	box.add_child(_row("Разрешение (оконный)", _resolution_option))
-
-	box.add_child(_slider_row("Качество рендера", 50, 100, 5, Settings.set_render_scale, "render_scale", 100.0, "%d%%"))
-
-	_fps_cap_option = OptionButton.new()
-	for cap in Settings.FPS_CAPS:
-		_fps_cap_option.add_item("Без ограничения" if cap == 0 else "%d FPS" % cap)
-	_fps_cap_option.item_selected.connect(_on_fps_cap_selected)
-	box.add_child(_row("Ограничение кадров", _fps_cap_option))
-
-	var vsync_check := CheckBox.new()
-	vsync_check.text = "Вкл"
-	vsync_check.toggled.connect(func(pressed): Settings.set_vsync(pressed))
-	box.add_child(_row("Вертикальная синхронизация", vsync_check))
-	_vsync_check = vsync_check
-
-	box.add_child(_slider_row("Громкость", 0, 100, 5, Settings.set_master_volume, "master_volume", 100.0, "%d%%"))
-
-	box.add_child(_slider_row("Чувствительность мыши", 20, 300, 10, Settings.set_mouse_sensitivity, "mouse_sensitivity", 100.0, "%d%%"))
-
-	var invert_check := CheckBox.new()
-	invert_check.text = "Вкл"
-	invert_check.toggled.connect(func(pressed): Settings.set_invert_y(pressed))
-	box.add_child(_row("Инверсия мыши по Y", invert_check))
-	_invert_check = invert_check
-
-	box.add_child(_slider_row("Угол обзора (FOV)", 60, 100, 1, Settings.set_fov, "fov", 1.0, "%d°"))
-
-	box.add_child(_slider_row("Яркость", 50, 150, 5, Settings.set_brightness, "brightness", 100.0, "%d%%"))
-
-	var overlay_check := CheckBox.new()
-	overlay_check.text = "Вкл"
-	overlay_check.toggled.connect(func(pressed): Settings.set_show_debug_overlay(pressed))
-	box.add_child(_row("Отладочная статистика", overlay_check))
-	_overlay_check = overlay_check
-
-	var back := Button.new()
-	back.text = "Назад"
-	back.pressed.connect(_show_main_panel)
-	box.add_child(back)
-
-	return box
-
-var _vsync_check: CheckBox
-var _invert_check: CheckBox
-var _overlay_check: CheckBox
-var _fps_cap_option: OptionButton
-var _sliders: Array[Dictionary] = []
-
-## Builds one HBoxContainer with a label, an HSlider and a value label.
-## `setter` applies the raw Settings value (slider units / display_scale);
-## `property_name` is read back via Object.get() for the value label and
-## initial slider position, so this stays in sync no matter who else
-## changes Settings. Kept to plain data (a Callable + a property name)
-## rather than a second lambda -- passing two inline lambdas into one call
-## here reliably tripped up GDScript's indentation parsing.
-func _slider_row(caption: String, min_v: float, max_v: float, step: float,
-		setter: Callable, property_name: String, display_scale: float, fmt: String) -> HBoxContainer:
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 16)
-	var cap := Label.new()
-	cap.text = caption
-	cap.custom_minimum_size = Vector2(170, 0)
-	row.add_child(cap)
-
-	var slider := HSlider.new()
-	slider.min_value = min_v
-	slider.max_value = max_v
-	slider.step = step
-	slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	row.add_child(slider)
-
-	var value_label := Label.new()
-	value_label.custom_minimum_size = Vector2(48, 0)
-	row.add_child(value_label)
-
-	slider.value_changed.connect(func(v):
-		setter.call(v / display_scale)
-		value_label.text = fmt % roundi(v))
-
-	_sliders.append({
-		"slider": slider,
-		"value_label": value_label,
-		"property_name": property_name,
-		"display_scale": display_scale,
-		"fmt": fmt,
-	})
-	return row
-
-func _on_display_mode_selected(index: int) -> void:
-	Settings.set_fullscreen(index == 0)
-	_resolution_option.disabled = index == 0
-
-func _on_resolution_selected(index: int) -> void:
-	Settings.set_window_resolution(Settings.RESOLUTIONS[index])
-
-func _on_fps_cap_selected(index: int) -> void:
-	Settings.set_max_fps(Settings.FPS_CAPS[index])
-
-## Pulls every control's displayed state from the current Settings values
-## -- called once on ready, and would need re-calling if something else
-## external ever changed Settings while the menu is closed.
-func _sync_controls_to_settings() -> void:
-	_display_mode_option.selected = 0 if Settings.fullscreen else 1
-	_resolution_option.disabled = Settings.fullscreen
-	var res_index := Settings.RESOLUTIONS.find(Settings.window_resolution)
-	_resolution_option.selected = maxi(res_index, 0)
-	_vsync_check.button_pressed = Settings.vsync
-	_invert_check.button_pressed = Settings.invert_y
-	_overlay_check.button_pressed = Settings.show_debug_overlay
-	var cap_index := Settings.FPS_CAPS.find(Settings.max_fps)
-	_fps_cap_option.selected = maxi(cap_index, 0)
-
-	for entry in _sliders:
-		var slider: HSlider = entry["slider"]
-		var value_label: Label = entry["value_label"]
-		var fmt: String = entry["fmt"]
-		var display_value := roundi(Settings.get(entry["property_name"]) * float(entry["display_scale"]))
-		slider.set_value_no_signal(display_value)
-		value_label.text = fmt % display_value

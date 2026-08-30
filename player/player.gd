@@ -82,6 +82,10 @@ func _ready() -> void:
 	WorldState.world_changed.connect(_on_world_changed)
 	if starting_zone != &"":
 		ZoneManager.enter_zone(starting_zone)
+		# Must run after enter_zone(), not before: it force-darkens every
+		# zone except current_zone, and current_zone only becomes the
+		# starting zone once enter_zone() above has set it.
+		ZoneManager.darken_all_except_current()
 	_footstep_player = AudioStreamPlayer.new()
 	_footstep_player.volume_db = footstep_volume_db
 	add_child(_footstep_player)
