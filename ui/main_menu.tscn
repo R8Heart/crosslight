@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://blvfk7f0vgr62" path="res://ui/menu_hand_look.gd" id="1_ubpvv"]
 [ext_resource type="PackedScene" uid="uid://dxigf6claiwup" path="res://assets/hand/fist.glb" id="2_arv2f"]
+[ext_resource type="Environment" uid="uid://dkcknmnumttu1" path="res://assets/skybox/new_environment.tres" id="2_kaxbk"]
 [ext_resource type="Script" uid="uid://bsaq06r5wcfxo" path="res://player/lantern_rig.gd" id="3_5klac"]
 [ext_resource type="PackedScene" uid="uid://ckgp7k2tcuuu3" path="res://assets/hand/lantern.glb" id="4_lsdqh"]
 [ext_resource type="Script" uid="uid://df60bhcvbmgo8" path="res://player/orb.gd" id="5_jiymt"]
@@ -13,27 +14,6 @@
 [ext_resource type="Shader" uid="uid://n1vbsp2eoglo" path="res://assets/shaders/menu_fog_volume.gdshader" id="10_fogvolume"]
 [ext_resource type="Script" uid="uid://db08nfpuubcwj" path="res://ui/main_menu.gd" id="11_mainmenu"]
 [ext_resource type="AudioStream" uid="uid://dlqq8ct7nhetx" path="res://assets/audio/Menu.mp3" id="13_bgtsx"]
-
-[sub_resource type="Environment" id="Environment_gpve8"]
-background_mode = 1
-background_color = Color(0.019607844, 0.019607844, 0.03137255, 1)
-ambient_light_source = 2
-ambient_light_color = Color(0.09, 0.13, 0.11, 1)
-ambient_light_energy = 0.7
-ssr_fade_in = 0.42426342
-ssr_fade_out = 2.7320805
-ssr_depth_tolerance = 24.91
-glow_enabled = true
-glow_bloom = 1.0
-fog_enabled = true
-fog_light_color = Color(0, 0.0627451, 0, 1)
-volumetric_fog_enabled = true
-volumetric_fog_albedo = Color(0.0051989057, 0.005198906, 0.0051989057, 1)
-volumetric_fog_emission = Color(0, 0.0016686023, 0, 1)
-adjustment_enabled = true
-adjustment_brightness = 0.88
-adjustment_contrast = 1.25
-adjustment_saturation = 0.93
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_8t03j"]
 render_priority = 1
@@ -157,7 +137,7 @@ size = Vector2i(1152, 648)
 render_target_update_mode = 4
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="ViewportBackground/SubViewport" unique_id=214904713]
-environment = SubResource("Environment_gpve8")
+environment = ExtResource("2_kaxbk")
 
 [node name="Camera3D" type="Camera3D" parent="ViewportBackground/SubViewport" unique_id=888852225]
 current = true
