@@ -40,6 +40,13 @@ var _item_tweens: Dictionary = {}
 
 func _ready() -> void:
 	_build_list()
+	_list_root.modulate.a = 0.0
+
+	var hand := get_node("ViewportBackground/SubViewport/handAnchor") as MenuHandLook
+	hand.play_intro()
+
+	var tw := create_tween()
+	tw.tween_property(_list_root, "modulate:a", 1.0, 1.2)
 
 ## ---------------------------------------------------------------------
 ## List construction

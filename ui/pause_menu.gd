@@ -23,7 +23,7 @@ func _ready() -> void:
 func _input(event: InputEvent) -> void:
 	if not visible:
 		return
-	if event.is_action_pressed("ui_cancel") and _settings_panel.visible:
+	if (event.is_action_pressed("ui_cancel") or event.is_action_pressed(&"gamepad_back")) and _settings_panel.visible:
 		_show_main_panel()
 		get_viewport().set_input_as_handled()
 

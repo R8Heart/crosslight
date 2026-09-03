@@ -36,6 +36,13 @@ const IDLE_ROT_SPEED := 0.4
 const IDLE_POS_AMOUNT := Vector3(0.01, 0.006, 0.0)
 const IDLE_POS_SPEED := 0.5
 
+## How far back into the fog the hand sits on menu load before play_intro()
+## pulls it in to its authored rest pose -- offsets are relative to whatever
+## position/rotation the node was actually placed at in the editor, so no
+## separate "hidden" pose needs authoring by hand.
+const INTRO_OFFSET := Vector3(0.05, -0.1, 0.5)
+const INTRO_ROT_OFFSET := Vector3(0.0, -0.4, 0.0)
+
 var _rest_rotation: Vector3
 var _rest_position: Vector3
 var _target_yaw := 0.0
@@ -43,9 +50,20 @@ var _target_pitch := 0.0
 var _yaw := 0.0
 var _pitch := 0.0
 
+## 0 = fully at the intro offset (hidden back in the fog), 1 = fully at
+## rest. Starts at 0 so the hand arrives into position rather than just
+## being there from the first frame -- ui/main_menu.gd calls play_intro()
+## as soon as the menu is built.
+var _intro_progress := 0.0
+
 func _ready() -> void:
 	_rest_rotation = rotation
 	_rest_position = position
+
+## Tweens the hand from its fog-hidden offset in to its authored rest pose.
+func play_intro(duration: float = 1.7) -> void:
+	var tw := create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tw.tween_property(self, "_intro_progress", 1.0, duration)
 
 func _process(delta: float) -> void:
 	# Polled directly instead of read from _unhandled_input: that only fires
@@ -68,9 +86,10 @@ func _process(delta: float) -> void:
 
 	var time := Time.get_ticks_msec() / 1000.0
 	var idle_rot := sin(time * IDLE_ROT_SPEED) * IDLE_ROT_AMOUNT
-	rotation = _rest_rotation + Vector3(_pitch, _yaw + idle_rot, 0.0)
+	var intro_blend := 1.0 - _intro_progress
+	rotation = _rest_rotation + INTRO_ROT_OFFSET * intro_blend + Vector3(_pitch, _yaw + idle_rot, 0.0)
 
-	position = _rest_position + Vector3(
+	position = _rest_position + INTRO_OFFSET * intro_blend + Vector3(
 		sin(time * IDLE_POS_SPEED) * IDLE_POS_AMOUNT.x,
 		sin(time * IDLE_POS_SPEED * 0.6) * IDLE_POS_AMOUNT.y,
 		0.0

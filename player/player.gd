@@ -12,6 +12,12 @@ const PITCH_LIMIT := 1.4
 ## weight instead of the view snapping frame-perfect with the cursor —
 ## a body turning its head isn't a camera rotating instantly on a pivot.
 const LOOK_SMOOTH := 15.0
+## Radians/sec at full right-stick deflection -- mouse look moves the
+## target instantly per-event (see _unhandled_input), but a stick has no
+## discrete "moved" event to hook the same way, so this is polled and
+## integrated continuously in _process instead.
+const GAMEPAD_LOOK_SPEED := 3.0
+const GAMEPAD_LOOK_DEADZONE := 0.2
 
 ## How far the viewmodel swings while walking, in metres — kept small, this
 ## is meant to read as "alive", not a cartoonish wobble.
@@ -99,12 +105,29 @@ func _ready() -> void:
 	Settings.changed.connect(_apply_fov)
 	_apply_fov()
 
+	InputDevice.device_changed.connect(_update_interact_hint_text)
+	_update_interact_hint_text()
+
 func _apply_fov() -> void:
 	camera.fov = Settings.fov
 
 func _process(delta: float) -> void:
 	_publish_fog_globals(delta)
+	_update_gamepad_look(delta)
 	_update_look(delta)
+
+## Right-stick look: unlike mouse motion (an event fired once per actual
+## movement), a stick held over means "keep turning" every frame it's
+## deflected, so this nudges the same _target_yaw/_target_pitch the mouse
+## code adjusts, continuously, instead of reacting to a one-off event.
+func _update_gamepad_look(delta: float) -> void:
+	var look := Input.get_vector("look_left", "look_right", "look_up", "look_down", GAMEPAD_LOOK_DEADZONE)
+	if look == Vector2.ZERO:
+		return
+	var y_sign := -1.0 if Settings.invert_y else 1.0
+	_target_yaw -= look.x * GAMEPAD_LOOK_SPEED * Settings.mouse_sensitivity * delta
+	_target_pitch -= look.y * GAMEPAD_LOOK_SPEED * Settings.mouse_sensitivity * delta * y_sign
+	_target_pitch = clamp(_target_pitch, -PITCH_LIMIT, PITCH_LIMIT)
 
 ## The actual view eases toward wherever the mouse has pointed it, instead
 ## of snapping there in the same frame the input arrived — see LOOK_SMOOTH.
@@ -129,7 +152,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		_target_yaw -= event.relative.x * sens
 		_target_pitch -= event.relative.y * sens * y_sign
 		_target_pitch = clamp(_target_pitch, -PITCH_LIMIT, PITCH_LIMIT)
-	if event.is_action_pressed("ui_cancel"):
+	if event.is_action_pressed("ui_cancel") or event.is_action_pressed(&"pause_gamepad"):
 		pause_menu.toggle_pause()
 	if event.is_action_pressed("interact"):
 		_try_interact()
@@ -140,9 +163,15 @@ func _physics_process(delta: float) -> void:
 	if not is_on_floor():
 		velocity.y -= GRAVITY * delta
 
+	# get_vector() already caps the result to length <= 1 while preserving
+	# partial magnitude for analog input (a keyboard tap is always exactly
+	# 0 or 1, but a gamepad stick half-pushed comes back as ~0.5) --
+	# normalizing here would throw that away and make any deflection past
+	# the deadzone snap straight to full speed, with no gradual walk.
 	var input_dir := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
-	var direction := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
-	var current_speed := SPEED * SPRINT_MULTIPLIER if Input.is_physical_key_pressed(KEY_SHIFT) else SPEED
+	var direction := transform.basis * Vector3(input_dir.x, 0, input_dir.y)
+	var sprinting := Input.is_physical_key_pressed(KEY_SHIFT) or Input.is_action_pressed(&"sprint")
+	var current_speed := SPEED * SPRINT_MULTIPLIER if sprinting else SPEED
 	velocity.x = direction.x * current_speed
 	velocity.z = direction.z * current_speed
 
@@ -202,6 +231,14 @@ func _update_interact_hint() -> void:
 	interact_ray.force_raycast_update()
 	var target := interact_ray.get_collider() if interact_ray.is_colliding() else null
 	interact_hint.visible = target != null and target.has_method("interact")
+
+## Keeps the hint's button glyph matching whichever device is active --
+## "E взаимодействовать" on keyboard, "X взаимодействовать" on an Xbox pad,
+## "Квадрат взаимодействовать" on PlayStation, etc. Connected to
+## InputDevice.device_changed rather than refreshed every frame since it
+## only ever needs to change on an actual device switch.
+func _update_interact_hint_text(_is_gamepad := false) -> void:
+	interact_hint.text = "%s взаимодействовать" % InputDevice.action_glyph(&"interact")
 
 func _try_interact() -> void:
 	interact_ray.force_raycast_update()
