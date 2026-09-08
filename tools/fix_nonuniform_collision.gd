@@ -1,9 +1,9 @@
 @tool
 extends EditorScript
 
-## Run from the Script editor (File > Run / Ctrl+Shift+X) with main open and
-## edited. Jolt Physics can't apply non-uniform scale to a collision shape --
-## when a CollisionShape3D's *global* scale isn't uniform (usually because a
+## Run from the Script editor (File > Run / Ctrl+Shift+X). Jolt Physics
+## can't apply non-uniform scale to a collision shape -- when a
+## CollisionShape3D's *global* scale isn't uniform (usually because a
 ## parent decoration was stretched unevenly, e.g. the fountain at (6,2,6)),
 ## Jolt silently swaps in the average of the three axes instead. The result
 ## still LOOKS right in the editor and in "visible collision shapes" debug
@@ -22,16 +22,30 @@ extends EditorScript
 ## anything else (Convex/Concave point-cloud shapes) is reported, not
 ## touched, since correcting those means rescaling every point rather than
 ## one or two numbers.
+##
+## SCOPE (learned the hard way): this used to walk the *entire* open scene
+## looking for anything non-uniform, which sounds thorough but isn't safe --
+## plenty of furniture/decor is non-uniformly scaled on purpose and was
+## never actually broken, and "fixing" it anyway corrupted collision on
+## objects that had nothing to do with whatever prompted the run (doors,
+## in one case; the fountain before that). Select the specific node (or
+## subtree root) you actually mean to fix in the Scene dock before running
+## this -- it only walks the current editor selection, never the whole tree.
+##
+## DRY_RUN defaults to true: the first pass only PRINTS what it would
+## change. Read that list, make sure nothing on it surprises you, then flip
+## this to false and run again to actually apply it.
+const DRY_RUN := true
 
 func _run() -> void:
-	var root := get_editor_interface().get_edited_scene_root()
-	if root == null:
-		print("FIXCOLLISION: no scene is open in the editor -- open main first.")
+	var selected := get_editor_interface().get_selection().get_selected_nodes()
+	if selected.is_empty():
+		print("FIXCOLLISION: nothing selected. Select the specific node(s) you mean to fix in the Scene dock first -- this no longer walks the whole scene.")
 		return
 
 	var fixed := 0
 	var skipped := 0
-	var stack: Array[Node] = [root]
+	var stack: Array[Node] = selected.duplicate()
 	while not stack.is_empty():
 		var node: Node = stack.pop_back()
 		for child in node.get_children():
@@ -43,7 +57,10 @@ func _run() -> void:
 			elif result == -1:
 				skipped += 1
 
-	print("FIXCOLLISION: fixed %d non-uniform collision shape(s), %d flagged for manual review. Save with Ctrl+S." % [fixed, skipped])
+	if DRY_RUN:
+		print("FIXCOLLISION (DRY RUN, nothing applied): would fix %d, %d flagged for manual review. Review the list above, then set DRY_RUN = false to actually apply." % [fixed, skipped])
+	else:
+		print("FIXCOLLISION: fixed %d non-uniform collision shape(s), %d flagged for manual review. Save with Ctrl+S." % [fixed, skipped])
 
 ## Returns 1 if fixed, -1 if flagged/skipped (non-uniform but unsupported
 ## shape type), 0 if it was already fine.
@@ -93,6 +110,10 @@ func _check_and_fix(cs: CollisionShape3D) -> int:
 		print("  SKIP (unsupported shape %s, needs manual fix): %s  global_scale=%s" % [
 			shape.get_class(), path, scale])
 		return -1
+
+	if DRY_RUN:
+		print("  WOULD FIX: %s  global_scale=%s -> would become uniform" % [path, scale])
+		return 1
 
 	# Cancel the inherited scale at this node so the shape (now baked to the
 	# right absolute size) ends up with a uniform global scale of 1.

@@ -18,6 +18,7 @@ extends Control
 ## easier to fix that once project-wide than per node.
 const SettingsPanelScript := preload("res://ui/settings_panel.gd")
 const SceneLoaderScript := preload("res://ui/scene_loader.gd")
+const VignetteShader := preload("res://assets/shaders/vignette.gdshader")
 
 const ITEMS := ["Новая игра", "Настройки", "Выйти"]
 const ITEM_FONT_SIZE := 32
@@ -39,6 +40,7 @@ var _settings_panel: SettingsPanel
 var _item_tweens: Dictionary = {}
 
 func _ready() -> void:
+	_build_vignette()
 	_build_list()
 	_list_root.modulate.a = 0.0
 
@@ -47,6 +49,20 @@ func _ready() -> void:
 
 	var tw := create_tween()
 	tw.tween_property(_list_root, "modulate:a", 1.0, 1.2)
+
+## A wider-than-authored screen (ultrawide monitors especially) reveals more
+## of the 3D backdrop's frustum at the edges than this scene was framed
+## for -- the hand model's mesh boundary and the fog quads' own edges are
+## only ever meant to be seen cropped by the frame, not head-on. Rather
+## than chase every possible aspect ratio by hand, darken the screen edges
+## so nothing hard-edged is visible out there regardless of screen shape.
+func _build_vignette() -> void:
+	var vignette := ColorRect.new()
+	vignette.set_anchors_preset(Control.PRESET_FULL_RECT)
+	vignette.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	vignette.material = ShaderMaterial.new()
+	vignette.material.shader = VignetteShader
+	add_child(vignette)
 
 ## ---------------------------------------------------------------------
 ## List construction

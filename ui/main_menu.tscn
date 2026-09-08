@@ -66,18 +66,21 @@ render_priority = 1
 shader = ExtResource("10_fogvolume")
 shader_parameter/fog_color = Color(0.06, 0.13, 0.08, 1)
 shader_parameter/fog_color_bright = Color(0.2, 0.38, 0.22, 1)
+shader_parameter/glint_color = Color(0.72, 0.9, 0.6, 1)
+shader_parameter/glint_strength = 0.5
 shader_parameter/density = 2.4
 shader_parameter/noise_scale = 1.3
 shader_parameter/contrast = 1.3
 shader_parameter/drift = Vector2(0.05, 0.025)
 shader_parameter/warp_strength = 1.6
 shader_parameter/edge_softness = 0.85
+shader_parameter/side_softness = 0.35
 shader_parameter/gradient_start = 0.15
 shader_parameter/gradient_end = 0.85
 
 [sub_resource type="QuadMesh" id="QuadMesh_fogvolume"]
 material = SubResource("ShaderMaterial_fogvolume")
-size = Vector2(1.1, 1.1)
+size = Vector2(2.6, 2.6)
 
 [node name="MainMenu" type="Control" unique_id=556037263]
 layout_mode = 3
@@ -170,6 +173,7 @@ mesh = SubResource("QuadMesh_fogvolume")
 [node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="." unique_id=1844509981]
 stream = ExtResource("13_bgtsx")
 autoplay = true
+parameters/looping = true
 
 [editable path="ViewportBackground/SubViewport/handAnchor/HandModel"]
 [editable path="ViewportBackground/SubViewport/handAnchor/HandModel/LanternRig/LanternVisual"]

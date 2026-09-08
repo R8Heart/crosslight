@@ -50,6 +50,15 @@ var _audio: AudioStreamPlayer3D
 var _last_sound_index := -1
 
 func _ready() -> void:
+	# Purely Tween-driven -- nothing needs this door's physics-reported
+	# velocity to react to it, so there's no reason to round-trip its
+	# transform through the physics server every physics tick. That
+	# round-trip, combined with this door inheriting non-uniform scale from
+	# its "doors" container (Jolt can't represent non-uniform scale
+	# cleanly -- see tools/fix_nonuniform_collision.gd) while the Tween
+	# rewrites rotation_degrees every frame, is the leading suspect for
+	# doors visually stretching further with every open/close.
+	sync_to_physics = false
 	if door_sounds.is_empty():
 		return
 	_audio = AudioStreamPlayer3D.new()

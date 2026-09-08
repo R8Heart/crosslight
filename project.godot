@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Crosslight"
-run/main_scene="uid://e6nmo4emjs3e"
+run/main_scene="uid://fi8e86oeg3eq"
 config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://icon.svg"
 
@@ -52,6 +52,7 @@ music_room=""
 kitchen=""
 storage_room=""
 card_room=""
+back_hallway=""
 
 [gui]
 
@@ -148,6 +149,7 @@ gamepad_back={
 
 [physics]
 
+3d/run_on_separate_thread=true
 3d/physics_engine="Jolt Physics"
 
 [rendering]

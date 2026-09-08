@@ -76,6 +76,7 @@ var pause_menu: CanvasLayer
 ## view doesn't jerk on the very first frame.
 var _target_yaw := 0.0
 var _target_pitch := 0.0
+var _interact_requested := false
 
 ## Doorway ZoneTriggers are small and sit right at each threshold, so
 ## spawning doesn't reliably land inside one -- state which zone the
@@ -155,7 +156,12 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel") or event.is_action_pressed(&"pause_gamepad"):
 		pause_menu.toggle_pause()
 	if event.is_action_pressed("interact"):
-		_try_interact()
+		# Not called directly: force_raycast_update() reaches into the
+		# physics server, and with Jolt running on its own thread an input
+		# event can land mid physics-step, where direct space state access
+		# is refused ("dss is null") -- an interact press would then
+		# silently do nothing. _physics_process is always a safe time to ask.
+		_interact_requested = true
 	if event.is_action_pressed("toggle_torch"):
 		WorldState.toggle()
 
@@ -178,6 +184,10 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	_update_interact_hint()
 	_update_viewmodel(delta)
+
+	if _interact_requested:
+		_interact_requested = false
+		_try_interact()
 
 ## Purely cosmetic viewmodel motion: a walk-cycle bob while moving, falling
 ## back to a slow idle sway at rest so the hand never looks frozen. Wall
