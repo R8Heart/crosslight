@@ -68,21 +68,33 @@ const CULLABLE_BRANCHES: Array[String] = [
 	"plintus_wood",
 	"plintus_vertical",
 	"lights",
+	"LIGHTS", # ironing_room's own lights branch is capitalized differently
 ]
 
 ## Which rooms stay drawn while standing in a given zone: the room itself,
 ## plus whatever is genuinely visible through its doorways. Anything not
 ## listed here is hidden. Rooms are a chain per wing (hall -> drawing room ->
-## music room -> card room, hall -> dining -> kitchen -> pantry), so each
-## room only ever needs its immediate neighbours.
+## music room -> card room, hall -> dining -> kitchen -> pantry, card room ->
+## back corridor -> its three annexes), so each room only ever needs its
+## immediate neighbours.
+##
+## back_hallway itself is deliberately NOT a key here (so it's never culled
+## FROM) -- same reasoning as "hall": it's a spine corridor connecting card
+## room to its annexes, visible from most of its own length, not a
+## self-contained room. It still appears as a *value* below so its three
+## annexes stay visible while the player is walking down it.
 const ROOM_ADJACENCY := {
 	&"hall": [&"living_room", &"dining_room"],
 	&"living_room": [&"music_room"],
 	&"music_room": [&"living_room", &"card_room"],
-	&"card_room": [&"music_room"],
+	&"card_room": [&"music_room", &"back_hallway"],
 	&"dining_room": [&"kitchen"],
 	&"kitchen": [&"dining_room", &"storage_room"],
 	&"storage_room": [&"kitchen"],
+	&"back_hallway": [&"laundromat", &"ironing_room", &"steward_room"],
+	&"laundromat": [&"back_hallway"],
+	&"ironing_room": [&"back_hallway"],
+	&"steward_room": [&"back_hallway"],
 	&"estate": [],
 }
 
@@ -91,6 +103,7 @@ const ROOM_ADJACENCY := {
 const CULLABLE_ROOMS: Array[StringName] = [
 	&"living_room", &"music_room", &"card_room",
 	&"dining_room", &"kitchen", &"storage_room",
+	&"laundromat", &"ironing_room", &"steward_room",
 ]
 
 ## Fired after a zone change is fully applied (visibility + lighting already
@@ -143,7 +156,12 @@ func enter_zone(zone_id: StringName) -> void:
 	var previous := current_zone
 	current_zone = zone_id
 	_apply_room_visibility(zone_id)
-	_set_zone_lit(zone_id, true)
+	# The very first zone entry (previous == "") is the boot-time one: that
+	# zone is meant to just be lit already when the player's first frame
+	# renders, no animation at all -- see the darken_all_except_current()
+	# comment above. Sparks only make sense for an actual transition into a
+	# zone that was genuinely dark a moment ago.
+	_set_zone_lit(zone_id, true, previous != &"")
 	if previous != &"":
 		_set_zone_lit(previous, false)
 	zone_entered.emit(zone_id)
@@ -191,12 +209,90 @@ func _room_root(zone_id: StringName) -> Node3D:
 	_room_roots[zone_id] = found
 	return found
 
-func _set_zone_lit(zone_id: StringName, lit: bool) -> void:
+func _set_zone_lit(zone_id: StringName, lit: bool, use_sparks: bool = true) -> void:
 	var nodes := _find_dimmables(zone_id)
 	print("[ZONE] _set_zone_lit('%s', lit=%s) -- %d fixtures" % [zone_id, lit, nodes.size()])
+	# Lighting up: each fixture gets kindled by a spark flown out from the
+	# player's own lantern orb (see light_spark.gd) instead of just fading
+	# in where it stands -- the lantern is the player's soul, so it reads
+	# as the soul reaching out to light its own path. Darkening still uses
+	# the old plain fade; there's no lore reason for a light to visibly
+	# "unkindle" on the way out, and it also keeps room-exit instant/cheap.
+	var sparks_available := lit and use_sparks and _find_orb() != null
 	for node in nodes:
-		var delay := randf_range(0.0, MAX_STAGGER) if lit else 0.0
-		_fade(node, lit, delay)
+		if sparks_available and node is Node3D:
+			_spawn_spark_delayed(zone_id, node, randf_range(0.0, SPARK_LAUNCH_STAGGER))
+		else:
+			var delay := randf_range(0.0, MAX_STAGGER) if lit else 0.0
+			_fade(node, lit, delay)
+
+## Orb -> LanternVisual -> LanternRig -> ViewmodelPivot -> Camera3D -> Head,
+## per player.tscn -- see player/orb.gd for what it actually is (the
+## player's soul, held in the lantern).
+const ORB_PATH := ^"Head/Camera3D/ViewmodelPivot/HandModel/LanternRig/LanternVisual/Orb"
+
+func _find_orb() -> Node3D:
+	var player := get_tree().get_first_node_in_group(&"player")
+	if player == null:
+		return null
+	return player.get_node_or_null(ORB_PATH) as Node3D
+
+## Spread across up to this long so a room full of fixtures reads as a
+## quick flurry of sparks pouring out of the lantern, not a single
+## simultaneous burst -- short on purpose. Total worst-case time from zone
+## entry to the last fixture at full brightness is roughly this plus the
+## spark's own flight time (0.15-0.8s, see light_spark.gd) plus
+## SPARK_ARRIVAL_FADE_TIME below; the room shouldn't still be visibly
+## catching up more than ~1s after the player walks in.
+const SPARK_LAUNCH_STAGGER := 0.35
+## Deliberately much shorter than the plain FADE_TIME used for non-spark
+## fades -- the spark's flight already sold "the light is arriving", so it
+## only needs a quick flash-up on landing, not a second slow fade.
+const SPARK_ARRIVAL_FADE_TIME := 0.35
+
+const SPARK_REAL_CORE := Color(1.0, 0.85, 0.5)
+const SPARK_REAL_MID := Color(1.0, 0.55, 0.15)
+const SPARK_OTHER_CORE := Color(0.75, 1.0, 0.8)
+const SPARK_OTHER_MID := Color(0.3, 1.0, 0.5)
+
+## Fire-and-forget coroutine (the `await` below is what makes this one,
+## even though it isn't declared async) -- _set_zone_lit calls this once
+## per fixture without waiting, so every spark's stagger delay runs
+## independently and in parallel.
+func _spawn_spark_delayed(zone_id: StringName, target_node: Node, delay: float) -> void:
+	if delay > 0.0:
+		await get_tree().create_timer(delay).timeout
+	if not is_instance_valid(target_node):
+		return
+
+	# Re-resolved *here*, after the wait, not passed in from _set_zone_lit:
+	# the player keeps walking during this spark's own stagger delay (up to
+	# SPARK_LAUNCH_STAGGER seconds), and a position grabbed back when the
+	# zone first lit up would leave a late-staggered spark launching from
+	# wherever the player used to be -- trailing behind them in thin air
+	# instead of actually coming out of the lantern they're currently
+	# holding.
+	var orb := _find_orb()
+	if orb == null:
+		_fade(target_node, true, 0.0)
+		return
+
+	var spark := LightSpark.new()
+	add_child(spark)
+	var is_real := WorldState.current_world == WorldState.World.REAL
+	var core := SPARK_REAL_CORE if is_real else SPARK_OTHER_CORE
+	var mid := SPARK_REAL_MID if is_real else SPARK_OTHER_MID
+	spark.launch(orb.global_position, (target_node as Node3D).global_position, -orb.global_transform.basis.z, core, mid)
+	spark.arrived.connect(func():
+		# The player may have already left this zone again by the time a
+		# slow-staggered spark lands -- don't relight a fixture that's
+		# meant to be going dark again. Short fade, not the full FADE_TIME:
+		# the spark's own flight already read as the "light arriving" beat,
+		# so a long fade on top of that on top of the launch stagger was
+		# what made a whole room take 2-3+ seconds to finish lighting.
+		if current_zone == zone_id:
+			_fade(target_node, true, 0.0, SPARK_ARRIVAL_FADE_TIME)
+	)
 
 ## Deliberately not cached across calls -- group membership only ever
 ## covers a room's own light fixtures (a few dozen nodes at most), so
@@ -269,7 +365,7 @@ func _set_dark_immediately(node: Node) -> void:
 	if node is Light3D:
 		(node as Light3D).visible = false
 
-func _fade(node: Node, lit: bool, delay: float = 0.0) -> void:
+func _fade(node: Node, lit: bool, delay: float = 0.0, duration: float = FADE_TIME) -> void:
 	var property := _dim_property(node)
 	var target := _lit_value(node) if lit else 0.0
 
@@ -291,7 +387,7 @@ func _fade(node: Node, lit: bool, delay: float = 0.0) -> void:
 	# brightness in the first instant and then crawl the last few percent --
 	# EASE_OUT was doing exactly that, which read as "snaps on, then a
 	# barely visible flicker" instead of a fade.
-	tween.tween_property(node, property, target, FADE_TIME) \
+	tween.tween_property(node, property, target, duration) \
 		.set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
 
 	if not lit and light:

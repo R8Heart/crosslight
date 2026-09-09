@@ -60,11 +60,14 @@ var _sparks: GPUParticles3D
 var _spark_mat: StandardMaterial3D
 var _last_brightness := -1.0
 var _rebuild_queued := false
+var _last_particle_density := 1.0
 
 func _ready() -> void:
 	_rebuild()
 	if not Engine.is_editor_hint():
 		WorldState.world_changed.connect(_on_world_changed)
+		Settings.changed.connect(_on_settings_changed)
+		_last_particle_density = Settings.particle_density
 
 func _process(_delta: float) -> void:
 	if not Engine.is_editor_hint():
@@ -120,9 +123,23 @@ func _apply_world_colors(world = null) -> void:
 	var process := _sparks.process_material as ParticleProcessMaterial
 	process.color_ramp = _spark_ramp(core, mid)
 
+## Settings.particle_density scales this instance's own authored count
+## rather than being an absolute number, so a big fireplace still reads as
+## bigger than a single candle at every quality level. Editor preview always
+## shows the full authored count regardless of the player's saved setting.
+func _effective_particle_count() -> int:
+	if Engine.is_editor_hint():
+		return spark_particles
+	return maxi(1, roundi(spark_particles * Settings.particle_density))
+
+func _on_settings_changed() -> void:
+	if not is_equal_approx(Settings.particle_density, _last_particle_density):
+		_last_particle_density = Settings.particle_density
+		_rebuild()
+
 func _build_sparks() -> GPUParticles3D:
 	var p := GPUParticles3D.new()
-	p.amount = spark_particles
+	p.amount = _effective_particle_count()
 	# An ember's whole job is to drift well clear of the fire before it dies.
 	p.lifetime = 2.6
 	p.randomness = 0.8

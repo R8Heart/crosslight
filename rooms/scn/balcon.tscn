@@ -1,0 +1,349 @@
+[gd_scene format=4 uid="uid://ck45xe4rl54ow"]
+
+[ext_resource type="PackedScene" uid="uid://w0jqp2lf2ujt" path="res://assets/facade/classical pediment 3d model (1).glb" id="1_qqwqi"]
+[ext_resource type="PackedScene" uid="uid://bvxs3l2x38v3q" path="res://assets/facade/ornamental roundel 3d model.glb" id="2_n4g86"]
+[ext_resource type="PackedScene" uid="uid://bykxtpsuu4086" path="res://assets/facade/marble plaque 3d model.glb" id="3_h741s"]
+[ext_resource type="PackedScene" uid="uid://6qpika4x1qxi" path="res://assets/facade/marble pedestal 3d model.glb" id="4_3li5r"]
+[ext_resource type="Texture2D" uid="uid://7yc7garn7vqs" path="res://assets/materials/stone/Marble006/Marble006_4K-PNG_Color.png" id="5_oh6go"]
+[ext_resource type="Texture2D" uid="uid://dq6y8tu0o2qy2" path="res://assets/materials/stone/Marble006/Marble006_4K-PNG_NormalGL.png" id="6_6c1pc"]
+[ext_resource type="Texture2D" uid="uid://bh8j4uxa7tlwh" path="res://assets/materials/stone/Marble006/Marble006_4K-PNG_Roughness.png" id="7_d434k"]
+[ext_resource type="PackedScene" uid="uid://do7r75b7l33oy" path="res://assets/facade/v2/classical column 3d model.glb" id="8_r13d7"]
+[ext_resource type="PackedScene" uid="uid://dpl84dpcxcaq8" path="res://assets/facade/marble balustrade 3d model.glb" id="9_bp0ps"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_rnyts"]
+albedo_texture = ExtResource("5_oh6go")
+metallic = 0.05
+metallic_specular = 0.05
+roughness_texture = ExtResource("7_d434k")
+normal_enabled = true
+normal_texture = ExtResource("6_6c1pc")
+bent_normal_texture = ExtResource("6_6c1pc")
+clearcoat_enabled = true
+clearcoat = 0.08
+clearcoat_roughness = 0.32
+clearcoat_texture = ExtResource("6_6c1pc")
+ao_light_affect = 1.0
+ao_texture = ExtResource("6_6c1pc")
+refraction_scale = -0.13
+uv1_triplanar_sharpness = 24.25147
+grow_amount = 2.649
+
+[sub_resource type="ArrayMesh" id="ArrayMesh_diojo"]
+_surfaces = [{
+"aabb": AABB(-7, -0.25, -2.6, 14, 0.5, 5.2),
+"attribute_data": PackedByteArray("AACAPwAAgD8AAIA/AAAAAAAAAAAAAAAAAACAPwAAgD8AAIA/AAAAAAAAAAAAAAAAAACAPwAAgD8AAIA/AAAAAAAAAAAAAAAAAAAAAAAAgD8AAIA/AACAPwAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIA/AACAPwAAgD8AAAAAAACAPwAAAAAAAIA/AACAPwAAgD8AAIA/AAAAAAAAAAAAAAAAAAAAAAAAgD8AAIA/AAAAAAAAAAAAAIA/"),
+"format": 34359742487,
+"index_count": 36,
+"index_data": PackedByteArray("AAABAAIAAwAEAAUABgAHAAgAAgAJAAAACgALAAwADQAOAA8ABQAQAAMADAARAAoAEgATABQACAAVAAYADwAWAA0AFAAXABIA"),
+"material": SubResource("StandardMaterial3D_rnyts"),
+"primitive": 3,
+"uv_scale": Vector4(0, 0, 0, 0),
+"vertex_count": 24,
+"vertex_data": PackedByteArray("AADgwAAAgL5mZiZAAADgwAAAgL5mZibAAADgwAAAgD5mZibAAADgQAAAgL5mZibAAADgwAAAgL5mZibAAADgwAAAgL5mZiZAAADgwAAAgD5mZibAAADgwAAAgL5mZibAAADgQAAAgL5mZibAAADgwAAAgD5mZiZAAADgwAAAgL5mZiZAAADgwAAAgD5mZiZAAADgQAAAgD5mZiZAAADgQAAAgD5mZiZAAADgwAAAgD5mZiZAAADgwAAAgD5mZibAAADgQAAAgL5mZiZAAADgQAAAgL5mZiZAAADgQAAAgL5mZibAAADgQAAAgL5mZiZAAADgQAAAgD5mZiZAAADgQAAAgD5mZibAAADgQAAAgD5mZibAAADgQAAAgD5mZibAAAAAgP9//n8AAACA/3/+fwAAAID/f/5/AIAAAP//AAAAgAAA//8AAACAAAD//wAA/////wAA/z//////AAD/P/////8AAP8/AAAAgP9//n//f/9/AAD/P/9//38AAP8//3//fwAA/z8AgP////8AAACA/////wAAAID/////AAAAgAAA//8AAP9//38AAP8///8AgP9//n///wCA/3/+f///AID/f/5//////wAA/z8AgP////8AAP//AID/f/5/")
+}]
+
+[sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_diojo"]
+data = PackedVector3Array(-7, -0.375, 2.6, -7, -0.375, -2.6, -7, 0.375, -2.6, 7, -0.375, -2.6, -7, -0.375, -2.6, -7, -0.375, 2.6, -7, 0.375, -2.6, -7, -0.375, -2.6, 7, -0.375, -2.6, -7, 0.375, -2.6, -7, 0.375, 2.6, -7, -0.375, 2.6, -7, -0.375, 2.6, -7, 0.375, 2.6, 7, 0.375, 2.6, 7, 0.375, 2.6, -7, 0.375, 2.6, -7, 0.375, -2.6, -7, -0.375, 2.6, 7, -0.375, 2.6, 7, -0.375, -2.6, 7, 0.375, 2.6, 7, -0.375, 2.6, -7, -0.375, 2.6, 7, -0.375, -2.6, 7, -0.375, 2.6, 7, 0.375, 2.6, 7, -0.375, -2.6, 7, 0.375, -2.6, -7, 0.375, -2.6, -7, 0.375, -2.6, 7, 0.375, -2.6, 7, 0.375, 2.6, 7, 0.375, 2.6, 7, 0.375, -2.6, 7, -0.375, -2.6)
+
+[sub_resource type="ArrayMesh" id="ArrayMesh_v3yyt"]
+_surfaces = [{
+"aabb": AABB(-5.98798, -0.5979004, -2.4220612, 11.97596, 1.1958008, 4.8441224),
+"attribute_data": PackedByteArray("AACAPwAAgD8AAIA/AAAAAAAAAAAAAAAAAACAPwAAgD8AAIA/AAAAAAAAAAAAAAAAAACAPwAAgD8AAIA/AAAAAAAAAAAAAAAAAAAAAAAAgD8AAIA/AACAPwAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIA/AACAPwAAgD8AAAAAAACAPwAAAAAAAIA/AACAPwAAgD8AAIA/AAAAAAAAAAAAAAAAAAAAAAAAgD8AAIA/AAAAAAAAAAAAAIA/"),
+"format": 34359742487,
+"index_count": 36,
+"index_data": PackedByteArray("AAABAAIAAwAEAAUABgAHAAgAAgAJAAAACgALAAwADQAOAA8ABQAQAAMADAARAAoAEgATABQACAAVAAYADwAWAA0AFAAXABIA"),
+"material": SubResource("StandardMaterial3D_rnyts"),
+"primitive": 3,
+"uv_scale": Vector4(0, 0, 0, 0),
+"vertex_count": 24,
+"vertex_data": PackedByteArray("iJ2/wAAQGb8NAxtAiJ2/wAAQGb8NAxvAiJ2/wAAQGT8NAxvAiJ2/QAAQGb8NAxvAiJ2/wAAQGb8NAxvAiJ2/wAAQGb8NAxtAiJ2/wAAQGT8NAxvAiJ2/wAAQGb8NAxvAiJ2/QAAQGb8NAxvAiJ2/wAAQGT8NAxtAiJ2/wAAQGb8NAxtAiJ2/wAAQGT8NAxtAiJ2/QAAQGT8NAxtAiJ2/QAAQGT8NAxtAiJ2/wAAQGT8NAxtAiJ2/wAAQGT8NAxvAiJ2/QAAQGb8NAxtAiJ2/QAAQGb8NAxtAiJ2/QAAQGb8NAxvAiJ2/QAAQGb8NAxtAiJ2/QAAQGT8NAxtAiJ2/QAAQGT8NAxvAiJ2/QAAQGT8NAxvAiJ2/QAAQGT8NAxvAAAAAgP9//n8AAACA/3/+fwAAAID/f/5/AIAAAP//AAAAgAAA//8AAACAAAD//wAA/////wAA/z//////AAD/P/////8AAP8/AAAAgP9//n//f/9/AAD/P/9//38AAP8//3//fwAA/z8AgP////8AAACA/////wAAAID/////AAAAgAAA//8AAP9//38AAP8///8AgP9//n///wCA/3/+f///AID/f/5//////wAA/z8AgP////8AAP//AID/f/5/")
+}]
+
+[sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_vu2ye"]
+data = PackedVector3Array(-5.98798, -0.8968506, 2.4220612, -5.98798, -0.8968506, -2.4220612, -5.98798, 0.8968506, -2.4220612, 5.98798, -0.8968506, -2.4220612, -5.98798, -0.8968506, -2.4220612, -5.98798, -0.8968506, 2.4220612, -5.98798, 0.8968506, -2.4220612, -5.98798, -0.8968506, -2.4220612, 5.98798, -0.8968506, -2.4220612, -5.98798, 0.8968506, -2.4220612, -5.98798, 0.8968506, 2.4220612, -5.98798, -0.8968506, 2.4220612, -5.98798, -0.8968506, 2.4220612, -5.98798, 0.8968506, 2.4220612, 5.98798, 0.8968506, 2.4220612, 5.98798, 0.8968506, 2.4220612, -5.98798, 0.8968506, 2.4220612, -5.98798, 0.8968506, -2.4220612, -5.98798, -0.8968506, 2.4220612, 5.98798, -0.8968506, 2.4220612, 5.98798, -0.8968506, -2.4220612, 5.98798, 0.8968506, 2.4220612, 5.98798, -0.8968506, 2.4220612, -5.98798, -0.8968506, 2.4220612, 5.98798, -0.8968506, -2.4220612, 5.98798, -0.8968506, 2.4220612, 5.98798, 0.8968506, 2.4220612, 5.98798, -0.8968506, -2.4220612, 5.98798, 0.8968506, -2.4220612, -5.98798, 0.8968506, -2.4220612, -5.98798, 0.8968506, -2.4220612, 5.98798, 0.8968506, -2.4220612, 5.98798, 0.8968506, 2.4220612, 5.98798, 0.8968506, 2.4220612, 5.98798, 0.8968506, -2.4220612, 5.98798, -0.8968506, -2.4220612)
+
+[sub_resource type="ArrayMesh" id="ArrayMesh_j14di"]
+_surfaces = [{
+"aabb": AABB(-7, -0.25, -3.195, 14, 0.5, 6.39),
+"attribute_data": PackedByteArray("AACAPwAAgD8AAIA/AAAAAAAAAAAAAAAAAACAPwAAgD8AAIA/AAAAAAAAAAAAAAAAAACAPwAAgD8AAIA/AAAAAAAAAAAAAAAAAAAAAAAAgD8AAIA/AACAPwAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIA/AACAPwAAgD8AAAAAAACAPwAAAAAAAIA/AACAPwAAgD8AAIA/AAAAAAAAAAAAAAAAAAAAAAAAgD8AAIA/AAAAAAAAAAAAAIA/"),
+"format": 34359742487,
+"index_count": 36,
+"index_data": PackedByteArray("AAABAAIAAwAEAAUABgAHAAgAAgAJAAAACgALAAwADQAOAA8ABQAQAAMADAARAAoAEgATABQACAAVAAYADwAWAA0AFAAXABIA"),
+"material": SubResource("StandardMaterial3D_rnyts"),
+"primitive": 3,
+"uv_scale": Vector4(0, 0, 0, 0),
+"vertex_count": 24,
+"vertex_data": PackedByteArray("AADgwAAAgL7hekxAAADgwAAAgL7hekzAAADgwAAAgD7hekzAAADgQAAAgL7hekzAAADgwAAAgL7hekzAAADgwAAAgL7hekxAAADgwAAAgD7hekzAAADgwAAAgL7hekzAAADgQAAAgL7hekzAAADgwAAAgD7hekxAAADgwAAAgL7hekxAAADgwAAAgD7hekxAAADgQAAAgD7hekxAAADgQAAAgD7hekxAAADgwAAAgD7hekxAAADgwAAAgD7hekzAAADgQAAAgL7hekxAAADgQAAAgL7hekxAAADgQAAAgL7hekzAAADgQAAAgL7hekxAAADgQAAAgD7hekxAAADgQAAAgD7hekzAAADgQAAAgD7hekzAAADgQAAAgD7hekzAAAAAgP9//n8AAACA/3/+fwAAAID/f/5/AIAAAP//AAAAgAAA//8AAACAAAD//wAA/////wAA/z//////AAD/P/////8AAP8/AAAAgP9//n//f/9/AAD/P/9//38AAP8//3//fwAA/z8AgP////8AAACA/////wAAAID/////AAAAgAAA//8AAP9//38AAP8///8AgP9//n///wCA/3/+f///AID/f/5//////wAA/z8AgP////8AAP//AID/f/5/")
+}]
+
+[sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_v3yyt"]
+data = PackedVector3Array(-7, -0.375, 3.195, -7, -0.375, -3.195, -7, 0.375, -3.195, 7, -0.375, -3.195, -7, -0.375, -3.195, -7, -0.375, 3.195, -7, 0.375, -3.195, -7, -0.375, -3.195, 7, -0.375, -3.195, -7, 0.375, -3.195, -7, 0.375, 3.195, -7, -0.375, 3.195, -7, -0.375, 3.195, -7, 0.375, 3.195, 7, 0.375, 3.195, 7, 0.375, 3.195, -7, 0.375, 3.195, -7, 0.375, -3.195, -7, -0.375, 3.195, 7, -0.375, 3.195, 7, -0.375, -3.195, 7, 0.375, 3.195, 7, -0.375, 3.195, -7, -0.375, 3.195, 7, -0.375, -3.195, 7, -0.375, 3.195, 7, 0.375, 3.195, 7, -0.375, -3.195, 7, 0.375, -3.195, -7, 0.375, -3.195, -7, 0.375, -3.195, 7, 0.375, -3.195, 7, 0.375, 3.195, 7, 0.375, 3.195, 7, 0.375, -3.195, 7, -0.375, -3.195)
+
+[sub_resource type="ArrayMesh" id="ArrayMesh_mfg17"]
+_surfaces = [{
+"aabb": AABB(-5.9895325, -0.5973511, -2.711958, 11.979065, 1.1947021, 5.423916),
+"attribute_data": PackedByteArray("AACAPwAAgD8AAIA/AAAAAAAAAAAAAAAAAACAPwAAgD8AAIA/AAAAAAAAAAAAAAAAAACAPwAAgD8AAIA/AAAAAAAAAAAAAAAAAAAAAAAAgD8AAIA/AACAPwAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIA/AACAPwAAgD8AAAAAAACAPwAAAAAAAIA/AACAPwAAgD8AAIA/AAAAAAAAAAAAAAAAAAAAAAAAgD8AAIA/AAAAAAAAAAAAAIA/"),
+"format": 34359742487,
+"index_count": 36,
+"index_data": PackedByteArray("AAABAAIAAwAEAAUABgAHAAgAAgAJAAAACgALAAwADQAOAA8ABQAQAAMADAARAAoAEgATABQACAAVAAYADwAWAA0AFAAXABIA"),
+"material": SubResource("StandardMaterial3D_rnyts"),
+"primitive": 3,
+"uv_scale": Vector4(0, 0, 0, 0),
+"vertex_count": 24,
+"vertex_data": PackedByteArray("QKq/wADsGL+4kC1AQKq/wADsGL+4kC3AQKq/wADsGD+4kC3AQKq/QADsGL+4kC3AQKq/wADsGL+4kC3AQKq/wADsGL+4kC1AQKq/wADsGD+4kC3AQKq/wADsGL+4kC3AQKq/QADsGL+4kC3AQKq/wADsGD+4kC1AQKq/wADsGL+4kC1AQKq/wADsGD+4kC1AQKq/QADsGD+4kC1AQKq/QADsGD+4kC1AQKq/wADsGD+4kC1AQKq/wADsGD+4kC3AQKq/QADsGL+4kC1AQKq/QADsGL+4kC1AQKq/QADsGL+4kC3AQKq/QADsGL+4kC1AQKq/QADsGD+4kC1AQKq/QADsGD+4kC3AQKq/QADsGD+4kC3AQKq/QADsGD+4kC3AAAAAgP9//n8AAACA/3/+fwAAAID/f/5/AIAAAP//AAAAgAAA//8AAACAAAD//wAA/////wAA/z//////AAD/P/////8AAP8/AAAAgP9//n//f/9/AAD/P/9//38AAP8//3//fwAA/z8AgP////8AAACA/////wAAAID/////AAAAgAAA//8AAP9//38AAP8///8AgP9//n///wCA/3/+f///AID/f/5//////wAA/z8AgP////8AAP//AID/f/5/")
+}]
+
+[sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_41j5r"]
+data = PackedVector3Array(-5.9895325, -0.8960266, 2.711958, -5.9895325, -0.8960266, -2.711958, -5.9895325, 0.8960266, -2.711958, 5.9895325, -0.8960266, -2.711958, -5.9895325, -0.8960266, -2.711958, -5.9895325, -0.8960266, 2.711958, -5.9895325, 0.8960266, -2.711958, -5.9895325, -0.8960266, -2.711958, 5.9895325, -0.8960266, -2.711958, -5.9895325, 0.8960266, -2.711958, -5.9895325, 0.8960266, 2.711958, -5.9895325, -0.8960266, 2.711958, -5.9895325, -0.8960266, 2.711958, -5.9895325, 0.8960266, 2.711958, 5.9895325, 0.8960266, 2.711958, 5.9895325, 0.8960266, 2.711958, -5.9895325, 0.8960266, 2.711958, -5.9895325, 0.8960266, -2.711958, -5.9895325, -0.8960266, 2.711958, 5.9895325, -0.8960266, 2.711958, 5.9895325, -0.8960266, -2.711958, 5.9895325, 0.8960266, 2.711958, 5.9895325, -0.8960266, 2.711958, -5.9895325, -0.8960266, 2.711958, 5.9895325, -0.8960266, -2.711958, 5.9895325, -0.8960266, 2.711958, 5.9895325, 0.8960266, 2.711958, 5.9895325, -0.8960266, -2.711958, 5.9895325, 0.8960266, -2.711958, -5.9895325, 0.8960266, -2.711958, -5.9895325, 0.8960266, -2.711958, 5.9895325, 0.8960266, -2.711958, 5.9895325, 0.8960266, 2.711958, 5.9895325, 0.8960266, 2.711958, 5.9895325, 0.8960266, -2.711958, 5.9895325, -0.8960266, -2.711958)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_sfmbg"]
+size = Vector3(2.2548828, 11.901855, 2.1762085)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_t5bxt"]
+size = Vector3(2.2548828, 7.8775406, 2.1762085)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_inpkm"]
+size = Vector3(2.2548828, 7.8775406, 2.1762085)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_et43f"]
+size = Vector3(2.2548828, 7.8775406, 2.1762085)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ipyfh"]
+size = Vector3(2.2548828, 7.8775406, 2.1762085)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_tgkue"]
+size = Vector3(2.2548828, 11.901855, 2.1762085)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_cxtvw"]
+size = Vector3(2.2548828, 11.901855, 2.1762085)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_8aakb"]
+size = Vector3(2.2548828, 11.901855, 2.1762085)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_bydmk"]
+size = Vector3(2.2548828, 11.901855, 2.1762085)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_2e1sd"]
+size = Vector3(2.2548828, 11.901855, 2.1762085)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_xnnkw"]
+size = Vector3(2.5060956, 1.4567294, 0.35939515)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_20twd"]
+size = Vector3(2.5060956, 1.4567294, 0.35939515)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_uxg3l"]
+size = Vector3(2.5060956, 1.4567294, 0.35939515)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_sdtj3"]
+size = Vector3(2.5060956, 1.4567294, 0.35939515)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_62uc2"]
+size = Vector3(2.5060954, 1.4567294, 0.3593951)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_sp7ch"]
+size = Vector3(2.5060954, 1.4567294, 0.3593951)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_pxebp"]
+size = Vector3(2.5060954, 1.4567294, 0.3593951)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_rlwhd"]
+size = Vector3(2.5060954, 1.4567294, 0.3593951)
+
+[node name="balcon" type="Node3D" unique_id=575282943]
+transform = Transform3D(1, 0, 0, 0, 1.5, 0, 0, 0, 1, 0, 0, 0)
+
+[node name="box" type="Node3D" parent="." unique_id=1052998678]
+
+[node name="classical pediment 3d model (1)" parent="box" unique_id=778905942 instance=ExtResource("1_qqwqi")]
+transform = Transform3D(14.985723, -0.65429074, 0, 0.6542908, 14.9857235, 0, 0, 0, 15, 0.053681374, 13.779135, 7.77931)
+
+[node name="ornamental roundel 3d model" parent="box" unique_id=944565337 instance=ExtResource("2_n4g86")]
+transform = Transform3D(2, 0, 0, 0, 1.255, 0, 0, 0, 3.005, 0, 13.696109, 8.910335)
+
+[node name="marble plaque 3d model" parent="box" unique_id=885363805 instance=ExtResource("3_h741s")]
+transform = Transform3D(6.8, 0, 0, 0, 3.205, 0, 0, 0, 7.36, -3.338855, 13.528944, 8.541014)
+
+[node name="marble plaque 3d model2" parent="box" unique_id=2062092879 instance=ExtResource("3_h741s")]
+transform = Transform3D(6.8, 0, 0, 0, 3.205, 0, 0, 0, 7.36, 3.2961137, 13.528944, 8.541014)
+
+[node name="marble plaque 3d model3" parent="box" unique_id=1220922437 instance=ExtResource("3_h741s")]
+transform = Transform3D(-2.9723742e-07, 0, 7.3599997, 0, 3.2049997, 0, -6.799999, 0, -3.217158e-07, 6.3900185, 13.528944, 4.988651)
+
+[node name="marble plaque 3d model4" parent="box" unique_id=1632493462 instance=ExtResource("3_h741s")]
+transform = Transform3D(-2.9723742e-07, 0, 7.3599997, 0, 3.2049997, 0, -6.799999, 0, -3.217158e-07, 6.3900185, 13.528944, 1.263324)
+
+[node name="marble plaque 3d model5" parent="box" unique_id=186969079 instance=ExtResource("3_h741s")]
+transform = Transform3D(-2.972374e-07, 0, -7.359999, 0, 3.2049997, 0, 6.799999, 0, -3.2171585e-07, -6.4481206, 13.528944, 1.2633243)
+
+[node name="marble plaque 3d model6" parent="box" unique_id=1704159921 instance=ExtResource("3_h741s")]
+transform = Transform3D(-2.972374e-07, 0, -7.359999, 0, 3.2049997, 0, 6.799999, 0, -3.2171585e-07, -6.4481206, 13.528944, 4.9886513)
+
+[node name="marble pedestal 3d model" parent="box" unique_id=1512729401 instance=ExtResource("4_3li5r")]
+transform = Transform3D(1.635, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.07144, 9.119189)
+
+[node name="floor3" type="MeshInstance3D" parent="box" unique_id=1637105676]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.3, 0.099853516)
+mesh = SubResource("ArrayMesh_diojo")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="box/floor3" unique_id=152681913]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="box/floor3/StaticBody3D" unique_id=1075419052]
+transform = Transform3D(1, 0, 0, 0, 0.6666667, 0, 0, 0, 1, 0, 0, 0)
+shape = SubResource("ConcavePolygonShape3D_diojo")
+
+[node name="floor4" type="MeshInstance3D" parent="box" unique_id=984836500]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.006412506, 14.126948, 0.29803157)
+mesh = SubResource("ArrayMesh_v3yyt")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="box/floor4" unique_id=1441085268]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="box/floor4/StaticBody3D" unique_id=983407967]
+transform = Transform3D(1, 0, 0, 0, 0.6666667, 0, 0, 0, 1, 0, 0, 0)
+shape = SubResource("ConcavePolygonShape3D_vu2ye")
+
+[node name="floor20" type="MeshInstance3D" parent="box" unique_id=1411650282]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.3, 5.9026794)
+mesh = SubResource("ArrayMesh_j14di")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="box/floor20" unique_id=42612349]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="box/floor20/StaticBody3D" unique_id=1546036167]
+transform = Transform3D(1, 0, 0, 0, 0.6666667, 0, 0, 0, 1, 0, 0, 0)
+shape = SubResource("ConcavePolygonShape3D_v3yyt")
+
+[node name="floor21" type="MeshInstance3D" parent="box" unique_id=22499998]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0035095215, 14.129962, 5.4196377)
+mesh = SubResource("ArrayMesh_mfg17")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="box/floor21" unique_id=553893633]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="box/floor21/StaticBody3D" unique_id=1980366984]
+transform = Transform3D(1, 0, 0, 0, 0.6666667, 0, 0, 0, 1, 0, 0, 0)
+shape = SubResource("ConcavePolygonShape3D_41j5r")
+
+[node name="classical column 3d model" parent="box" unique_id=2120708619 instance=ExtResource("8_r13d7")]
+transform = Transform3D(8, 0, 0, 0, 8, 0, 0, 0, 8, -5.727, 5.53, 7.82)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="box/classical column 3d model" unique_id=1896941236]
+transform = Transform3D(0.125, 0, 0, 0, 0.083333336, 0, 0, 0, 0.125, 0.002380371, 0.5027466, -0.0016670227)
+shape = SubResource("BoxShape3D_sfmbg")
+
+[node name="classical column 3d model8" parent="box" unique_id=122205451 instance=ExtResource("8_r13d7")]
+transform = Transform3D(-3.496911e-07, 0, 8, 0, 5.295, 0, -8, 0, -3.496911e-07, -5.9538817, -0.22927459, 7.82)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="box/classical column 3d model8" unique_id=1982139128]
+transform = Transform3D(0.125, 0, 0, 0, 0.12590493, 0, 0, 0, 0.125, 0.002380371, 0.5027466, -0.0016670227)
+shape = SubResource("BoxShape3D_t5bxt")
+
+[node name="classical column 3d model9" parent="box" unique_id=1064578195 instance=ExtResource("8_r13d7")]
+transform = Transform3D(-3.496911e-07, 0, 8, 0, 5.295, 0, -8, 0, -3.496911e-07, -5.9538817, -0.22927459, -1.2569906)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="box/classical column 3d model9" unique_id=735430035]
+transform = Transform3D(0.125, 0, 0, 0, 0.12590493, 0, 0, 0, 0.125, 0.002380371, 0.5027466, -0.0016670227)
+shape = SubResource("BoxShape3D_inpkm")
+
+[node name="classical column 3d model10" parent="box" unique_id=1241823423 instance=ExtResource("8_r13d7")]
+transform = Transform3D(-3.496911e-07, 0, 8, 0, 5.295, 0, -8, 0, -3.496911e-07, 5.9308977, -0.22927459, 7.82)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="box/classical column 3d model10" unique_id=233783688]
+transform = Transform3D(0.125, 0, 0, 0, 0.12590493, 0, 0, 0, 0.125, 0.002380371, 0.5027466, -0.0016670227)
+shape = SubResource("BoxShape3D_et43f")
+
+[node name="classical column 3d model11" parent="box" unique_id=695275748 instance=ExtResource("8_r13d7")]
+transform = Transform3D(-3.496911e-07, 0, 8, 0, 5.295, 0, -8, 0, -3.496911e-07, 5.9308977, -0.22927459, -1.2569906)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="box/classical column 3d model11" unique_id=1981570735]
+transform = Transform3D(0.125, 0, 0, 0, 0.12590493, 0, 0, 0, 0.125, 0.002380371, 0.5027466, -0.0016670227)
+shape = SubResource("BoxShape3D_ipyfh")
+
+[node name="classical column 3d model6" parent="box" unique_id=899119248 instance=ExtResource("8_r13d7")]
+transform = Transform3D(8, 0, 0, 0, 8, 0, 0, 0, 8, -5.727, 5.53, 3.237811)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="box/classical column 3d model6" unique_id=965076341]
+transform = Transform3D(0.125, 0, 0, 0, 0.083333336, 0, 0, 0, 0.125, 0.002380371, 0.5027466, -0.0016670227)
+shape = SubResource("BoxShape3D_tgkue")
+
+[node name="classical column 3d model7" parent="box" unique_id=673519665 instance=ExtResource("8_r13d7")]
+transform = Transform3D(8, 0, 0, 0, 8, 0, 0, 0, 8, 5.697485, 5.53, 3.237811)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="box/classical column 3d model7" unique_id=510531897]
+transform = Transform3D(0.125, 0, 0, 0, 0.083333336, 0, 0, 0, 0.125, 0.002380371, 0.5027466, -0.0016670227)
+shape = SubResource("BoxShape3D_cxtvw")
+
+[node name="classical column 3d model3" parent="box" unique_id=1252485043 instance=ExtResource("8_r13d7")]
+transform = Transform3D(8, 0, 0, 0, 8, 0, 0, 0, 8, -5.727, 5.53, -1.2227511)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="box/classical column 3d model3" unique_id=1954823127]
+transform = Transform3D(0.125, 0, 0, 0, 0.083333336, 0, 0, 0, 0.125, 0.002380371, 0.5027466, -0.0016670227)
+shape = SubResource("BoxShape3D_8aakb")
+
+[node name="classical column 3d model4" parent="box" unique_id=777659136 instance=ExtResource("8_r13d7")]
+transform = Transform3D(8, 0, 0, 0, 8, 0, 0, 0, 8, 5.7276726, 5.53, -1.2227511)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="box/classical column 3d model4" unique_id=1210064994]
+transform = Transform3D(0.125, 0, 0, 0, 0.083333336, 0, 0, 0, 0.125, 0.002380371, 0.5027466, -0.0016670227)
+shape = SubResource("BoxShape3D_bydmk")
+
+[node name="classical column 3d model2" parent="box" unique_id=354549854 instance=ExtResource("8_r13d7")]
+transform = Transform3D(8, 0, 0, 0, 8, 0, 0, 0, 8, 5.7313833, 5.53, 7.82)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="box/classical column 3d model2" unique_id=830853354]
+transform = Transform3D(0.125, 0, 0, 0, 0.083333336, 0, 0, 0, 0.125, 0.002380371, 0.5027466, -0.0016670227)
+shape = SubResource("BoxShape3D_2e1sd")
+
+[node name="marble balustrade 3d model" parent="box" unique_id=92531109 instance=ExtResource("9_bp0ps")]
+transform = Transform3D(-1.12556826e-07, 0, -2.135, 0, 1.365, 0, 2.575, 0, -9.332381e-08, -6.6450253, 5.5492268, 1.0013573)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="box/marble balustrade 3d model" unique_id=1316467684]
+transform = Transform3D(0.3883495, 0, -2.1800793e-12, 0, 0.48840046, 0, 1.8075607e-12, 0, 0.4683841, 0.0069255233, 0.36067867, -0.001159668)
+shape = SubResource("BoxShape3D_xnnkw")
+
+[node name="marble balustrade 3d model2" parent="box" unique_id=2001505962 instance=ExtResource("9_bp0ps")]
+transform = Transform3D(-1.12556826e-07, 0, -2.135, 0, 1.3650001, 0, 2.575, 0, -9.332381e-08, -6.6450253, 5.5492268, 5.5555043)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="box/marble balustrade 3d model2" unique_id=106168905]
+transform = Transform3D(0.3883495, 0, -2.1800793e-12, 0, 0.48840046, 0, 1.8075607e-12, 0, 0.4683841, 0.0069255233, 0.36067867, -0.001159668)
+shape = SubResource("BoxShape3D_20twd")
+
+[node name="marble balustrade 3d model7" parent="box" unique_id=711734743 instance=ExtResource("9_bp0ps")]
+transform = Transform3D(-1.12556826e-07, 0, -2.135, 0, 1.3650001, 0, 2.575, 0, -9.332381e-08, 6.548739, 5.5492268, 1.0013573)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="box/marble balustrade 3d model7" unique_id=1827110665]
+transform = Transform3D(0.3883495, 0, -2.1800793e-12, 0, 0.48840046, 0, 1.8075607e-12, 0, 0.4683841, 0.0069255233, 0.36067867, -0.001159668)
+shape = SubResource("BoxShape3D_uxg3l")
+
+[node name="marble balustrade 3d model8" parent="box" unique_id=1098882260 instance=ExtResource("9_bp0ps")]
+transform = Transform3D(-1.12556826e-07, 0, -2.135, 0, 1.3650001, 0, 2.575, 0, -9.332381e-08, 6.548739, 5.5492268, 5.5555043)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="box/marble balustrade 3d model8" unique_id=1794959868]
+transform = Transform3D(0.3883495, 0, -2.1800793e-12, 0, 0.48840046, 0, 1.8075607e-12, 0, 0.4683841, 0.0069255233, 0.36067867, -0.001159668)
+shape = SubResource("BoxShape3D_sdtj3")
+
+[node name="marble balustrade 3d model3" parent="box" unique_id=1975711788 instance=ExtResource("9_bp0ps")]
+transform = Transform3D(2.5749998, 0, 7.1054274e-15, 0, 1.3650001, 0, 0, 0, 2.1349998, -3.5033555, 5.5492268, 8.742815)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="box/marble balustrade 3d model3" unique_id=794644528]
+transform = Transform3D(0.38834953, 0, -2.1800795e-12, 0, 0.48840046, 0, 1.8075609e-12, 0, 0.46838412, 0.0069255233, 0.36067867, -0.001159668)
+shape = SubResource("BoxShape3D_62uc2")
+
+[node name="marble balustrade 3d model4" parent="box" unique_id=1917930075 instance=ExtResource("9_bp0ps")]
+transform = Transform3D(2.5749998, 0, 7.1054274e-15, 0, 1.3650001, 0, 0, 0, 2.1349998, -0.9983449, 5.5492268, 8.736792)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="box/marble balustrade 3d model4" unique_id=840177746]
+transform = Transform3D(0.38834953, 0, -2.1800795e-12, 0, 0.48840046, 0, 1.8075609e-12, 0, 0.46838412, 0.0069255233, 0.36067867, -0.001159668)
+shape = SubResource("BoxShape3D_sp7ch")
+
+[node name="marble balustrade 3d model5" parent="box" unique_id=651945531 instance=ExtResource("9_bp0ps")]
+transform = Transform3D(2.5749998, 0, 7.1054274e-15, 0, 1.3650001, 0, 0, 0, 2.1349998, 3.483572, 5.5492268, 8.730506)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="box/marble balustrade 3d model5" unique_id=829640886]
+transform = Transform3D(0.38834953, 0, -2.1800795e-12, 0, 0.48840046, 0, 1.8075609e-12, 0, 0.46838412, 0.0069255233, 0.36067867, -0.001159668)
+shape = SubResource("BoxShape3D_pxebp")
+
+[node name="marble balustrade 3d model6" parent="box" unique_id=733023083 instance=ExtResource("9_bp0ps")]
+transform = Transform3D(2.5749998, 0, 7.1054274e-15, 0, 1.3650001, 0, 0, 0, 2.1349998, 0.97927034, 5.5492268, 8.730506)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="box/marble balustrade 3d model6" unique_id=782833847]
+transform = Transform3D(0.38834953, 0, -2.1800795e-12, 0, 0.48840046, 0, 1.8075609e-12, 0, 0.46838412, 0.0069255233, 0.36067867, -0.001159668)
+shape = SubResource("BoxShape3D_rlwhd")

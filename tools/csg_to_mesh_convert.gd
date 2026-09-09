@@ -24,7 +24,7 @@ extends EditorScript
 ##   2. DRY_RUN = true, File > Run, read the report.
 ##   3. DRY_RUN = false, run again, then save the scene with Ctrl+S.
 
-const DRY_RUN := false
+const DRY_RUN := true
 
 ## The whole scene is scanned by default -- CSG doesn't always live under a
 ## tidy "walls"/"floors" branch (the lawns keep theirs at the scene root,

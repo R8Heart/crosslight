@@ -123,6 +123,10 @@ func load_scene(path: String) -> void:
 	get_tree().current_scene = new_scene
 	if old_scene:
 		old_scene.queue_free()
+	# Shadows-enabled/glow/fog/moonlight settings target things (MoonLight,
+	# the estate's Light3D fixtures) that don't exist until this scene is
+	# actually current -- see Settings.apply_scene_dependent().
+	Settings.apply_scene_dependent()
 
 	var fade_out := create_tween()
 	fade_out.tween_property(_fade, "color:a", 0.0, FADE_TIME)

@@ -47,9 +47,13 @@ extends GPUParticles3D
 
 var _mote_material: StandardMaterial3D
 var _rebuild_queued := false
+var _last_particle_density := 1.0
 
 func _ready() -> void:
 	_rebuild()
+	if not Engine.is_editor_hint():
+		Settings.changed.connect(_on_settings_changed)
+		_last_particle_density = Settings.particle_density
 
 func _rebuild() -> void:
 	if not is_inside_tree() or _rebuild_queued:
@@ -57,10 +61,24 @@ func _rebuild() -> void:
 	_rebuild_queued = true
 	_do_rebuild.call_deferred()
 
+## Settings.particle_density scales this instance's own authored mote_count
+## rather than being an absolute number -- same reasoning as
+## fire_sparks.gd's _effective_particle_count(). Editor preview always shows
+## the full authored count.
+func _effective_particle_count() -> int:
+	if Engine.is_editor_hint():
+		return mote_count
+	return maxi(1, roundi(mote_count * Settings.particle_density))
+
+func _on_settings_changed() -> void:
+	if not is_equal_approx(Settings.particle_density, _last_particle_density):
+		_last_particle_density = Settings.particle_density
+		_rebuild()
+
 func _do_rebuild() -> void:
 	_rebuild_queued = false
 
-	amount = mote_count
+	amount = _effective_particle_count()
 	lifetime = mote_lifetime
 	randomness = 0.9
 	fixed_fps = 30
