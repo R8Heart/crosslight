@@ -28,15 +28,21 @@ var _fps_cap_option: OptionButton
 var _vsync_check: CheckBox
 var _invert_check: CheckBox
 var _overlay_check: CheckBox
-var _msaa_option: OptionButton
-var _fxaa_check: CheckBox
-var _taa_check: CheckBox
+var _aa_method_option: OptionButton
 var _shadow_filter_option: OptionButton
 var _shadows_check: CheckBox
 var _moon_shadow_mode_option: OptionButton
 var _glow_check: CheckBox
 var _fog_check: CheckBox
 var _sliders: Array[Dictionary] = []
+var _warmup_overlay: CanvasLayer
+var _apply_graphics_button: Button
+## True while _sync_to_settings() is pushing values onto controls -- guards
+## _apply_pipeline_setting() against firing from that programmatic write
+## instead of an actual user click/toggle. HSlider has set_value_no_signal()
+## for exactly this; OptionButton/CheckBox don't, so this flag is the
+## equivalent for them.
+var _syncing := false
 
 var _display_confirm: ConfirmationDialog
 var _display_confirm_timer: Timer
@@ -68,10 +74,25 @@ func _build() -> void:
 	tabs.add_child(_build_controls_tab())
 	tabs.add_child(_build_audio_tab())
 
+	var bottom_row := HBoxContainer.new()
+	bottom_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	bottom_row.add_theme_constant_override("separation", 8)
+
+	# Lives next to "Назад" rather than the graphics presets row -- it's
+	# about leaving the screen with everything actually warmed, not about
+	# picking a preset.
+	_apply_graphics_button = Button.new()
+	_apply_graphics_button.text = "Применить графику"
+	_apply_graphics_button.visible = false
+	_apply_graphics_button.pressed.connect(_run_live_warmup)
+	bottom_row.add_child(_apply_graphics_button)
+
 	var back := Button.new()
 	back.text = "Назад"
 	back.pressed.connect(func(): back_pressed.emit())
-	add_child(back)
+	bottom_row.add_child(back)
+
+	add_child(bottom_row)
 
 ## One button per Settings.Preset -- applies a whole bundle of graphics
 ## settings at once for players who'd rather not tune each one by hand, then
@@ -89,7 +110,7 @@ func _build_presets_row() -> HBoxContainer:
 		btn.text = entry[0]
 		var preset_value = entry[1]
 		btn.pressed.connect(func():
-			Settings.apply_preset(preset_value)
+			_apply_pipeline_setting(func(): Settings.apply_preset(preset_value))
 			_sync_to_settings())
 		row.add_child(btn)
 	return row
@@ -132,24 +153,18 @@ func _build_graphics_tab() -> VBoxContainer:
 
 	tab.add_child(_slider_row("Качество рендера", 50, 100, 5, Settings.set_render_scale, "render_scale", 100.0, "%d%%"))
 
-	_msaa_option = OptionButton.new()
-	_msaa_option.add_item("Выкл", 0)
-	_msaa_option.add_item("MSAA 2x", 1)
-	_msaa_option.add_item("MSAA 4x", 2)
-	_msaa_option.item_selected.connect(func(i): Settings.set_msaa_3d(i))
-	tab.add_child(_row("Сглаживание MSAA", _msaa_option))
-
-	var fxaa_check := CheckBox.new()
-	fxaa_check.text = "Вкл"
-	fxaa_check.toggled.connect(func(pressed): Settings.set_fxaa_enabled(pressed))
-	tab.add_child(_row("Сглаживание FXAA", fxaa_check))
-	_fxaa_check = fxaa_check
-
-	var taa_check := CheckBox.new()
-	taa_check.text = "Вкл"
-	taa_check.toggled.connect(func(pressed): Settings.set_taa_enabled(pressed))
-	tab.add_child(_row("Временное сглаживание (TAA)", taa_check))
-	_taa_check = taa_check
+	# One choice, not three independent toggles -- MSAA+FXAA+TAA can all be
+	# switched on together (Godot allows it) but it's wasted GPU cost: FXAA
+	# blurs the frame after MSAA already resolved it, throwing away exactly
+	# what MSAA paid for.
+	_aa_method_option = OptionButton.new()
+	_aa_method_option.add_item("Выкл", Settings.AAMethod.NONE)
+	_aa_method_option.add_item("FXAA", Settings.AAMethod.FXAA)
+	_aa_method_option.add_item("MSAA 2x", Settings.AAMethod.MSAA_2X)
+	_aa_method_option.add_item("MSAA 4x", Settings.AAMethod.MSAA_4X)
+	_aa_method_option.add_item("Временное (TAA)", Settings.AAMethod.TAA)
+	_aa_method_option.item_selected.connect(func(i): _apply_pipeline_setting(func(): Settings.set_aa_method(i)))
+	tab.add_child(_row("Сглаживание", _aa_method_option))
 
 	tab.add_child(_slider_row("Яркость", 50, 150, 5, Settings.set_brightness, "brightness", 100.0, "%d%%"))
 
@@ -168,21 +183,21 @@ func _build_lighting_tab() -> VBoxContainer:
 
 	var shadows_check := CheckBox.new()
 	shadows_check.text = "Вкл"
-	shadows_check.toggled.connect(func(pressed): Settings.set_shadows_enabled(pressed))
+	shadows_check.toggled.connect(func(pressed): _apply_pipeline_setting(func(): Settings.set_shadows_enabled(pressed)))
 	tab.add_child(_row("Тени", shadows_check))
 	_shadows_check = shadows_check
 
 	_shadow_filter_option = OptionButton.new()
 	for label in ["Жёсткие (быстро)", "Мягкие: очень низкое", "Мягкие: низкое", "Мягкие: среднее", "Мягкие: высокое"]:
 		_shadow_filter_option.add_item(label)
-	_shadow_filter_option.item_selected.connect(func(i): Settings.set_shadow_filter_quality(i))
+	_shadow_filter_option.item_selected.connect(func(i): _apply_pipeline_setting(func(): Settings.set_shadow_filter_quality(i)))
 	tab.add_child(_row("Качество теней", _shadow_filter_option))
 
 	_moon_shadow_mode_option = OptionButton.new()
 	_moon_shadow_mode_option.add_item("Простой (быстро)", 0)
 	_moon_shadow_mode_option.add_item("PSSM 2 (средне)", 1)
 	_moon_shadow_mode_option.add_item("PSSM 4 (качественно)", 2)
-	_moon_shadow_mode_option.item_selected.connect(func(i): Settings.set_moon_shadow_mode(i))
+	_moon_shadow_mode_option.item_selected.connect(func(i): _apply_pipeline_setting(func(): Settings.set_moon_shadow_mode(i)))
 	tab.add_child(_row("Тень лунного света", _moon_shadow_mode_option))
 
 	tab.add_child(_slider_row("Дальность тени луны", 20, 300, 10, Settings.set_moon_shadow_max_distance, "moon_shadow_max_distance", 1.0, "%d м"))
@@ -368,6 +383,7 @@ func _revert_display_change() -> void:
 ## Called once after _build(); call again if this panel could be shown
 ## after Settings changed elsewhere while it wasn't visible.
 func _sync_to_settings() -> void:
+	_syncing = true
 	_display_mode_option.selected = 0 if Settings.fullscreen else 1
 	var res_index := Settings.RESOLUTIONS.find(Settings.window_resolution)
 	_resolution_option.selected = maxi(res_index, 0)
@@ -377,9 +393,7 @@ func _sync_to_settings() -> void:
 	var cap_index := Settings.FPS_CAPS.find(Settings.max_fps)
 	_fps_cap_option.selected = maxi(cap_index, 0)
 
-	_msaa_option.selected = Settings.msaa_3d
-	_fxaa_check.button_pressed = Settings.fxaa_enabled
-	_taa_check.button_pressed = Settings.taa_enabled
+	_aa_method_option.selected = Settings.aa_method
 	_shadow_filter_option.selected = Settings.shadow_filter_quality
 	_shadows_check.button_pressed = Settings.shadows_enabled
 	_moon_shadow_mode_option.selected = Settings.moon_shadow_mode
@@ -393,3 +407,77 @@ func _sync_to_settings() -> void:
 		var display_value := roundi(Settings.get(entry["property_name"]) * float(entry["display_scale"]))
 		slider.set_value_no_signal(display_value)
 		value_label.text = fmt % display_value
+	_syncing = false
+	_update_apply_button()
+
+## MSAA/TAA/FXAA/shadow-filter/shadow-mode changes can each force the
+## renderer to compile pipeline variants it's never needed before -- but
+## running the (multi-second) re-warm after every single click here made
+## trying a few of these back to back miserable. So: the setting itself
+## applies immediately (cheap, live preview, no reason to hold that back),
+## and only the actual warmup pass is deferred to an explicit "Применить
+## графику" button (_build_presets_row) that appears while anything's
+## pending -- one pass covers however many of these got changed in a row.
+func _apply_pipeline_setting(setter: Callable) -> void:
+	if _syncing:
+		return
+	setter.call()
+	_update_apply_button()
+
+func _update_apply_button() -> void:
+	if _apply_graphics_button:
+		_apply_graphics_button.visible = ShaderWarmup.needs_warmup()
+
+func _run_live_warmup() -> void:
+	if _warmup_overlay != null:
+		return
+	_warmup_overlay = CanvasLayer.new()
+	_warmup_overlay.layer = 100
+	get_tree().root.add_child(_warmup_overlay)
+
+	var bg := ColorRect.new()
+	bg.color = Color(0, 0, 0, 0.85)
+	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	bg.mouse_filter = Control.MOUSE_FILTER_STOP
+	_warmup_overlay.add_child(bg)
+
+	var box := VBoxContainer.new()
+	box.set_anchors_preset(Control.PRESET_CENTER)
+	box.custom_minimum_size = Vector2(420, 0)
+	box.position -= Vector2(210, 30)
+	box.add_theme_constant_override("separation", 10)
+	_warmup_overlay.add_child(box)
+
+	var title := Label.new()
+	title.text = "Обновление графики..."
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.add_theme_font_size_override("font_size", 18)
+	title.add_theme_color_override("font_color", Color(0.85, 0.85, 0.85))
+	box.add_child(title)
+
+	var bar := ProgressBar.new()
+	bar.min_value = 0
+	bar.max_value = 1
+	bar.show_percentage = false
+	bar.custom_minimum_size = Vector2(0, 16)
+	box.add_child(bar)
+
+	var status := Label.new()
+	status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	status.add_theme_font_size_override("font_size", 12)
+	status.add_theme_color_override("font_color", Color(0.55, 0.55, 0.55))
+	box.add_child(status)
+
+	var on_progress := func(current: int, total: int, room_name: String):
+		bar.max_value = total
+		bar.value = current
+		status.text = "%d / %d -- %s" % [current, total, room_name]
+	ShaderWarmup.progress.connect(on_progress)
+
+	ShaderWarmup.run()
+	await ShaderWarmup.finished
+
+	ShaderWarmup.progress.disconnect(on_progress)
+	_warmup_overlay.queue_free()
+	_warmup_overlay = null
+	_update_apply_button()

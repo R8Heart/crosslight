@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Crosslight"
-run/main_scene="uid://fi8e86oeg3eq"
+run/main_scene="res://ui/shader_warmup_screen.tscn"
 run/print_header=false
 config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://icon.svg"
@@ -27,6 +27,7 @@ ZoneManager="*res://autoload/zone_manager.gd"
 Settings="*res://autoload/settings.gd"
 InputDevice="*res://autoload/input_device.gd"
 GamepadCursor="*res://autoload/gamepad_cursor.gd"
+ShaderWarmup="*res://autoload/shader_warmup.gd"
 
 [debug]
 

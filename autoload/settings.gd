@@ -49,28 +49,21 @@ var fov := 75.0
 var brightness := 1.0
 
 ## --- Graphics quality ---
-## Index into MSAA_OPTIONS / SHADOW_QUALITY_OPTIONS below, not the raw enum
-## value -- keeps the menu's OptionButton index and the saved value the same
-## number, same convention as FPS_CAPS above.
-var msaa_3d := 0
-var fxaa_enabled := false
-## Temporal AA -- accumulates samples across frames, so unlike MSAA/FXAA
-## (which only smooth geometry edges) it also kills the shimmer/sparkle on
-## fine detail and specular highlights at a distance that neither of those
-## touch. Tradeoff: faint ghosting/smear trailing fast-moving bright things
-## (the lantern flame, LightSpark).
-##
-## Default OFF, deliberately: toggling use_taa forces the renderer to build
-## an extra motion-vector pass and pipeline variants for every visible
-## material, synchronously on the main thread. Defaulting this true made
-## that compile stall happen on every single boot, before the scene had a
-## chance to warm up -- it read as a full hang (confirmed 2026-09-09, had to
-## force-close the game). Same failure class as the shader-compile stutter
-## already seen in the friend's playtest logs, just moved earlier and made
-## unconditional. Leave this false by default; a player who turns it on
-## manually eats that one-time stall once, deliberately, instead of it
-## ambushing every launch.
-var taa_enabled := false
+
+## MSAA, FXAA and TAA used to be three independent toggles, which meant the
+## menu happily let a player turn on all three at once -- Godot allows it
+## (doesn't crash or misbehave) but it's wasted GPU cost: FXAA blurs the
+## screen after MSAA has already resolved it, throwing away exactly what
+## MSAA paid for, and stacking TAA on top adds ghosting for no further gain.
+## One choice, matching how most games actually present anti-aliasing.
+enum AAMethod { NONE, FXAA, MSAA_2X, MSAA_4X, TAA }
+
+## TAA needs a motion-vector pass the other methods don't, which forces the
+## renderer to build new pipelines for every visible material the first time
+## it's engaged -- confirmed as a full boot-time hang on 2026-09-09 before
+## ShaderWarmup existed to pay that cost up front, on a progress screen,
+## instead of ambushing whichever moment the setting first took effect.
+var aa_method: AAMethod = AAMethod.NONE
 ## Matches the project's original authored default (directional shadow was
 ## SOFT_MEDIUM before this settings system existed -- see project.godot's
 ## lights_and_shadows/directional_shadow/soft_shadow_filter_quality=3).
@@ -97,9 +90,6 @@ var particle_density := 1.0
 var moon_shadow_mode := 1
 var moon_shadow_max_distance := 100.0
 
-const MSAA_OPTIONS: Array[Viewport.MSAA] = [
-	Viewport.MSAA_DISABLED, Viewport.MSAA_2X, Viewport.MSAA_4X,
-]
 const SHADOW_QUALITY_OPTIONS: Array[RenderingServer.ShadowQuality] = [
 	RenderingServer.SHADOW_QUALITY_HARD,
 	RenderingServer.SHADOW_QUALITY_SOFT_VERY_LOW,
@@ -129,9 +119,7 @@ func _apply_all() -> void:
 	_apply_max_fps()
 	_apply_audio()
 	_apply_brightness()
-	_apply_msaa()
-	_apply_fxaa()
-	_apply_taa()
+	_apply_aa_method()
 	_apply_shadow_filter_quality()
 	apply_scene_dependent()
 	changed.emit()
@@ -272,34 +260,25 @@ func _apply_brightness() -> void:
 
 ## --- Graphics quality ---
 
-func set_msaa_3d(index: int) -> void:
-	msaa_3d = clampi(index, 0, MSAA_OPTIONS.size() - 1)
-	_apply_msaa()
+func set_aa_method(index: int) -> void:
+	aa_method = clampi(index, 0, AAMethod.size() - 1) as AAMethod
+	_apply_aa_method()
 	_save()
 	changed.emit()
 
-func _apply_msaa() -> void:
-	get_viewport().msaa_3d = MSAA_OPTIONS[msaa_3d]
+func _apply_aa_method() -> void:
+	apply_aa_to_viewport(get_viewport())
 
-func set_fxaa_enabled(value: bool) -> void:
-	fxaa_enabled = value
-	_apply_fxaa()
-	_save()
-	changed.emit()
-
-func _apply_fxaa() -> void:
-	get_viewport().screen_space_aa = (
-		Viewport.SCREEN_SPACE_AA_FXAA if fxaa_enabled else Viewport.SCREEN_SPACE_AA_DISABLED
+## Also called by ShaderWarmup on its own private offscreen viewport, so
+## whatever it warms actually matches what the real viewport ends up using.
+func apply_aa_to_viewport(vp: Viewport) -> void:
+	vp.msaa_3d = Viewport.MSAA_4X if aa_method == AAMethod.MSAA_4X \
+		else Viewport.MSAA_2X if aa_method == AAMethod.MSAA_2X \
+		else Viewport.MSAA_DISABLED
+	vp.screen_space_aa = (
+		Viewport.SCREEN_SPACE_AA_FXAA if aa_method == AAMethod.FXAA else Viewport.SCREEN_SPACE_AA_DISABLED
 	)
-
-func set_taa_enabled(value: bool) -> void:
-	taa_enabled = value
-	_apply_taa()
-	_save()
-	changed.emit()
-
-func _apply_taa() -> void:
-	get_viewport().use_taa = taa_enabled
+	vp.use_taa = aa_method == AAMethod.TAA
 
 func set_shadow_filter_quality(index: int) -> void:
 	shadow_filter_quality = clampi(index, 0, SHADOW_QUALITY_OPTIONS.size() - 1)
@@ -410,24 +389,24 @@ enum Preset { LOW, MEDIUM, HIGH }
 func apply_preset(preset: Preset) -> void:
 	match preset:
 		Preset.LOW:
-			set_msaa_3d(0)
-			set_fxaa_enabled(false)
+			set_aa_method(AAMethod.NONE)
 			set_shadow_filter_quality(1)
 			set_shadows_enabled(false)
 			set_glow_enabled(false)
 			set_volumetric_fog_enabled(false)
 			set_particle_density(0.25)
 		Preset.MEDIUM:
-			set_msaa_3d(0)
-			set_fxaa_enabled(true)
+			set_aa_method(AAMethod.FXAA)
 			set_shadow_filter_quality(3)
 			set_shadows_enabled(true)
 			set_glow_enabled(true)
 			set_volumetric_fog_enabled(true)
 			set_particle_density(0.5)
 		Preset.HIGH:
-			set_msaa_3d(1)
-			set_fxaa_enabled(false)
+			# Safe to default into TAA here specifically because
+			# ShaderWarmup now pays its pipeline-compile cost on a progress
+			# screen instead of ambushing the first moment it's needed.
+			set_aa_method(AAMethod.TAA)
 			set_shadow_filter_quality(4)
 			set_shadows_enabled(true)
 			set_glow_enabled(true)
@@ -466,9 +445,7 @@ func _save() -> void:
 	cfg.set_value("controls", "invert_y", invert_y)
 	cfg.set_value("controls", "fov", fov)
 	cfg.set_value("display", "brightness", brightness)
-	cfg.set_value("graphics", "msaa_3d", msaa_3d)
-	cfg.set_value("graphics", "fxaa_enabled", fxaa_enabled)
-	cfg.set_value("graphics", "taa_enabled", taa_enabled)
+	cfg.set_value("graphics", "aa_method", aa_method)
 	cfg.set_value("graphics", "shadow_filter_quality", shadow_filter_quality)
 	cfg.set_value("graphics", "shadows_enabled", shadows_enabled)
 	cfg.set_value("graphics", "glow_enabled", glow_enabled)
@@ -493,9 +470,7 @@ func _load() -> void:
 	invert_y = cfg.get_value("controls", "invert_y", invert_y)
 	fov = cfg.get_value("controls", "fov", fov)
 	brightness = cfg.get_value("display", "brightness", brightness)
-	msaa_3d = cfg.get_value("graphics", "msaa_3d", msaa_3d)
-	fxaa_enabled = cfg.get_value("graphics", "fxaa_enabled", fxaa_enabled)
-	taa_enabled = cfg.get_value("graphics", "taa_enabled", taa_enabled)
+	aa_method = cfg.get_value("graphics", "aa_method", aa_method) as AAMethod
 	shadow_filter_quality = cfg.get_value("graphics", "shadow_filter_quality", shadow_filter_quality)
 	shadows_enabled = cfg.get_value("graphics", "shadows_enabled", shadows_enabled)
 	glow_enabled = cfg.get_value("graphics", "glow_enabled", glow_enabled)
