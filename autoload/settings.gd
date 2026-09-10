@@ -54,7 +54,29 @@ var brightness := 1.0
 ## number, same convention as FPS_CAPS above.
 var msaa_3d := 0
 var fxaa_enabled := false
-var shadow_filter_quality := 1
+## Temporal AA -- accumulates samples across frames, so unlike MSAA/FXAA
+## (which only smooth geometry edges) it also kills the shimmer/sparkle on
+## fine detail and specular highlights at a distance that neither of those
+## touch. Tradeoff: faint ghosting/smear trailing fast-moving bright things
+## (the lantern flame, LightSpark).
+##
+## Default OFF, deliberately: toggling use_taa forces the renderer to build
+## an extra motion-vector pass and pipeline variants for every visible
+## material, synchronously on the main thread. Defaulting this true made
+## that compile stall happen on every single boot, before the scene had a
+## chance to warm up -- it read as a full hang (confirmed 2026-09-09, had to
+## force-close the game). Same failure class as the shader-compile stutter
+## already seen in the friend's playtest logs, just moved earlier and made
+## unconditional. Leave this false by default; a player who turns it on
+## manually eats that one-time stall once, deliberately, instead of it
+## ambushing every launch.
+var taa_enabled := false
+## Matches the project's original authored default (directional shadow was
+## SOFT_MEDIUM before this settings system existed -- see project.godot's
+## lights_and_shadows/directional_shadow/soft_shadow_filter_quality=3).
+## Defaulting lower than that silently downgraded shadow quality below what
+## the game always looked like, the moment this feature shipped.
+var shadow_filter_quality := 3
 ## Global on/off for every Light3D's shadow, independent of shadow_filter
 ## quality -- see _apply_shadows_enabled(), this is the one setting here
 ## that has to walk the live scene tree rather than just poke Viewport/
@@ -109,6 +131,7 @@ func _apply_all() -> void:
 	_apply_brightness()
 	_apply_msaa()
 	_apply_fxaa()
+	_apply_taa()
 	_apply_shadow_filter_quality()
 	apply_scene_dependent()
 	changed.emit()
@@ -269,6 +292,15 @@ func _apply_fxaa() -> void:
 		Viewport.SCREEN_SPACE_AA_FXAA if fxaa_enabled else Viewport.SCREEN_SPACE_AA_DISABLED
 	)
 
+func set_taa_enabled(value: bool) -> void:
+	taa_enabled = value
+	_apply_taa()
+	_save()
+	changed.emit()
+
+func _apply_taa() -> void:
+	get_viewport().use_taa = taa_enabled
+
 func set_shadow_filter_quality(index: int) -> void:
 	shadow_filter_quality = clampi(index, 0, SHADOW_QUALITY_OPTIONS.size() - 1)
 	_apply_shadow_filter_quality()
@@ -380,7 +412,7 @@ func apply_preset(preset: Preset) -> void:
 		Preset.LOW:
 			set_msaa_3d(0)
 			set_fxaa_enabled(false)
-			set_shadow_filter_quality(0)
+			set_shadow_filter_quality(1)
 			set_shadows_enabled(false)
 			set_glow_enabled(false)
 			set_volumetric_fog_enabled(false)
@@ -388,7 +420,7 @@ func apply_preset(preset: Preset) -> void:
 		Preset.MEDIUM:
 			set_msaa_3d(0)
 			set_fxaa_enabled(true)
-			set_shadow_filter_quality(1)
+			set_shadow_filter_quality(3)
 			set_shadows_enabled(true)
 			set_glow_enabled(true)
 			set_volumetric_fog_enabled(true)
@@ -396,7 +428,7 @@ func apply_preset(preset: Preset) -> void:
 		Preset.HIGH:
 			set_msaa_3d(1)
 			set_fxaa_enabled(false)
-			set_shadow_filter_quality(3)
+			set_shadow_filter_quality(4)
 			set_shadows_enabled(true)
 			set_glow_enabled(true)
 			set_volumetric_fog_enabled(true)
@@ -436,6 +468,7 @@ func _save() -> void:
 	cfg.set_value("display", "brightness", brightness)
 	cfg.set_value("graphics", "msaa_3d", msaa_3d)
 	cfg.set_value("graphics", "fxaa_enabled", fxaa_enabled)
+	cfg.set_value("graphics", "taa_enabled", taa_enabled)
 	cfg.set_value("graphics", "shadow_filter_quality", shadow_filter_quality)
 	cfg.set_value("graphics", "shadows_enabled", shadows_enabled)
 	cfg.set_value("graphics", "glow_enabled", glow_enabled)
@@ -462,6 +495,7 @@ func _load() -> void:
 	brightness = cfg.get_value("display", "brightness", brightness)
 	msaa_3d = cfg.get_value("graphics", "msaa_3d", msaa_3d)
 	fxaa_enabled = cfg.get_value("graphics", "fxaa_enabled", fxaa_enabled)
+	taa_enabled = cfg.get_value("graphics", "taa_enabled", taa_enabled)
 	shadow_filter_quality = cfg.get_value("graphics", "shadow_filter_quality", shadow_filter_quality)
 	shadows_enabled = cfg.get_value("graphics", "shadows_enabled", shadows_enabled)
 	glow_enabled = cfg.get_value("graphics", "glow_enabled", glow_enabled)

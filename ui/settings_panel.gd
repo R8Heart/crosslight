@@ -30,6 +30,7 @@ var _invert_check: CheckBox
 var _overlay_check: CheckBox
 var _msaa_option: OptionButton
 var _fxaa_check: CheckBox
+var _taa_check: CheckBox
 var _shadow_filter_option: OptionButton
 var _shadows_check: CheckBox
 var _moon_shadow_mode_option: OptionButton
@@ -143,6 +144,12 @@ func _build_graphics_tab() -> VBoxContainer:
 	fxaa_check.toggled.connect(func(pressed): Settings.set_fxaa_enabled(pressed))
 	tab.add_child(_row("Сглаживание FXAA", fxaa_check))
 	_fxaa_check = fxaa_check
+
+	var taa_check := CheckBox.new()
+	taa_check.text = "Вкл"
+	taa_check.toggled.connect(func(pressed): Settings.set_taa_enabled(pressed))
+	tab.add_child(_row("Временное сглаживание (TAA)", taa_check))
+	_taa_check = taa_check
 
 	tab.add_child(_slider_row("Яркость", 50, 150, 5, Settings.set_brightness, "brightness", 100.0, "%d%%"))
 
@@ -372,6 +379,7 @@ func _sync_to_settings() -> void:
 
 	_msaa_option.selected = Settings.msaa_3d
 	_fxaa_check.button_pressed = Settings.fxaa_enabled
+	_taa_check.button_pressed = Settings.taa_enabled
 	_shadow_filter_option.selected = Settings.shadow_filter_quality
 	_shadows_check.button_pressed = Settings.shadows_enabled
 	_moon_shadow_mode_option.selected = Settings.moon_shadow_mode
