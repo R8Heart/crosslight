@@ -23,10 +23,14 @@ CrossLight.app/
 Crosslight.exe
 crosslight_build/
 
-# Per-branch editing workflow: main.tscn was split into sub-scenes
-# (rooms/scn/*.scn). The .tscn text versions are the "in progress editing"
-# copies -- Claude can text-edit them directly, but they're 5-6x bigger
-# than the binary .scn versions and only the .scn ones are the ones
-# main_scene's dependency chain actually points to. Local only.
-rooms/tscn/
-rooms/estate_exterior.tscn
+# Per-branch editing workflow: rooms are saved as binary .scn files; the
+# user periodically resaves a .tscn (text) twin of whichever scene needs
+# Claude to read/grep it, since binary .scn isn't text-readable. These
+# copies can turn up as loose files anywhere in the tree (not just under
+# rooms/tscn/ -- rooms/scn/kitchen/kitchen.tscn is one example), so this is
+# an extension-based rule rather than a folder-based one. Files already
+# tracked before this rule was added (ui/main_menu.tscn, player/player.tscn,
+# etc. -- genuinely .tscn-native content, not debug copies) are unaffected;
+# gitignore only keeps NEW untracked .tscn files from being picked up by
+# `git add`. Local only.
+*.tscn
