@@ -59,6 +59,8 @@ ironing_room=""
 steward_room=""
 laundromat=""
 armory_room=""
+coal_storage_room=""
+dishwashes_room=""
 
 [gui]
 

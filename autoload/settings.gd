@@ -200,6 +200,7 @@ func _apply_display() -> void:
 		# Center the window -- resizing alone can leave it partially off-screen
 		# depending on where it was previously.
 		var screen_size := DisplayServer.screen_get_size()
+		@warning_ignore("integer_division")
 		DisplayServer.window_set_position((screen_size - window_resolution) / 2)
 
 ## --- Render scale (3D resolution scaling -- the main performance lever) ---

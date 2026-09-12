@@ -73,5 +73,12 @@ func _on_progress(current: int, total: int, room_name: String) -> void:
 ## scene swap is fast enough that it doesn't need SceneLoader's threaded
 ## load and progress dots (which are labelled "Загрузка усадьбы" anyway,
 ## the wrong text for landing on the menu).
+##
+## Deferred: this runs from ShaderWarmup's `finished` signal, which fires
+## from inside a coroutine that's still mid-frame right after the last
+## warmed scene's deferred queue_free() -- calling change_scene_to_file()
+## (which does its own remove_child on the tree root) right then collided
+## with that and threw "Parent node is busy adding/removing children"
+## (confirmed 2026-09-10). Deferring pushes it to the next idle point.
 func _continue() -> void:
-	get_tree().change_scene_to_file(_MAIN_MENU)
+	get_tree().change_scene_to_file.call_deferred(_MAIN_MENU)

@@ -162,7 +162,7 @@ func _build_graphics_tab() -> VBoxContainer:
 	_aa_method_option.add_item("FXAA", Settings.AAMethod.FXAA)
 	_aa_method_option.add_item("MSAA 2x", Settings.AAMethod.MSAA_2X)
 	_aa_method_option.add_item("MSAA 4x", Settings.AAMethod.MSAA_4X)
-	_aa_method_option.add_item("Временное (TAA)", Settings.AAMethod.TAA)
+	_aa_method_option.add_item("TAA", Settings.AAMethod.TAA)
 	_aa_method_option.item_selected.connect(func(i): _apply_pipeline_setting(func(): Settings.set_aa_method(i)))
 	tab.add_child(_row("Сглаживание", _aa_method_option))
 

@@ -97,7 +97,7 @@ func run() -> void:
 	var total := paths.size()
 	for i in range(total):
 		var path: String = paths[i]
-		progress.emit(i + 1, total, path.get_file())
+		progress.emit(i + 1, total, path.get_file().get_basename())
 		await _warm_scene(path)
 		Input.mouse_mode = restore_mouse_mode
 
@@ -132,28 +132,40 @@ func _save_fingerprint() -> void:
 	cfg.set_value("cache", "fingerprints", known)
 	cfg.save(CACHE_PATH)
 
-## Nearly every .scn in this project has a deliberate .tscn text twin kept
-## around purely so it can be read/grepped -- same content, not a second
-## scene to warm (see the crosslight-tscn-debug-copies project note). Group
-## by directory+basename and keep one per group, preferring .scn since
-## that's the binary the game actually loads; a .tscn with no .scn sibling
-## is real, native content and stays.
+## Nearly every scene in this project has a deliberate text-copy twin kept
+## around purely so it can be read/grepped (see the crosslight-tscn-debug-
+## copies project note) -- same content, not a second scene to warm. This
+## turned out to run deeper than one .tscn next to its .scn in the same
+## folder: rooms/scn/ and rooms/tscn/ are two whole parallel trees, and a
+## room can have a copy sitting stale in either one. Confirmed the hard way
+## (2026-09-10) -- rooms/scn/kitchen/kitchen.tscn hadn't been touched since
+## August and referenced a door asset that no longer exists; warming both it
+## and the real, current rooms/tscn/kitchen/kitchen.scn doubled the load and
+## helped exhaust VRAM (0x8007000e) into a crash.
+##
+## So: group by BASENAME ALONE, wherever in the tree it lives, and keep only
+## the most recently modified one. Doesn't assume either folder name means
+## "the real one" -- the user's own resave habit means whichever copy was
+## touched last is the one actually reflecting current content, regardless
+## of which tree it happens to sit in.
 func _collect_scene_paths() -> Array[String]:
 	var raw: Array[String] = []
 	_scan_dir("res://", raw)
 
-	var best: Dictionary = {}
+	var best: Dictionary = {} # basename -> path
+	var best_mtime: Dictionary = {} # basename -> modified time
 	for path in raw:
-		var key: String = path.get_base_dir().path_join(path.get_file().get_basename())
-		if not best.has(key) or path.get_extension() == "scn":
+		var key := path.get_file().get_basename()
+		var mtime := FileAccess.get_modified_time(path)
+		if not best.has(key) or mtime > best_mtime[key]:
 			best[key] = path
+			best_mtime[key] = mtime
 
 	var out: Array[String] = []
 	for key in best:
-		var path: String = best[key]
-		if path.get_file().get_basename() in _EXCLUDE_BASENAMES:
+		if key in _EXCLUDE_BASENAMES:
 			continue
-		out.append(path)
+		out.append(best[key])
 	out.sort()
 	return out
 
@@ -164,18 +176,18 @@ func _scan_dir(path: String, out: Array[String]) -> void:
 	if dir == null:
 		return
 	dir.list_dir_begin()
-	var name := dir.get_next()
-	while name != "":
-		if name == "." or name == "..":
-			name = dir.get_next()
+	var entry_name := dir.get_next()
+	while entry_name != "":
+		if entry_name == "." or entry_name == "..":
+			entry_name = dir.get_next()
 			continue
-		var full := path.path_join(name)
+		var full := path.path_join(entry_name)
 		if dir.current_is_dir():
-			if not name.begins_with("."):
+			if not entry_name.begins_with("."):
 				_scan_dir(full, out)
-		elif name.get_extension() in _SCAN_EXTENSIONS:
+		elif entry_name.get_extension() in _SCAN_EXTENSIONS:
 			out.append(full)
-		name = dir.get_next()
+		entry_name = dir.get_next()
 	dir.list_dir_end()
 
 ## Built once and reused across every room -- own_world_3d isolates it from
