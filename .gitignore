@@ -34,3 +34,10 @@ crosslight_build/
 # gitignore only keeps NEW untracked .tscn files from being picked up by
 # `git add`. Local only.
 *.tscn
+
+# Baked occlusion-culling data (Project > Generate Occlusion Culling) --
+# regenerated from room geometry, not authored content, and rooms/
+# estate_exterior.occ alone hit 133MB, over GitHub's 100MB single-file
+# limit and part of why a push kept failing. Local only; rebake after
+# pulling instead of expecting it in the repo.
+*.occ
