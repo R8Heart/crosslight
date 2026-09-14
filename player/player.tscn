@@ -105,7 +105,7 @@ shape = SubResource("CapsuleShape3D_1")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5013201, 0)
 
 [node name="AudioListener3D" type="AudioListener3D" parent="Head" unique_id=963083390]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.5013201, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02573514, 0)
 current = true
 
 [node name="Camera3D" type="Camera3D" parent="Head" unique_id=1821229651]
@@ -128,7 +128,7 @@ orb_path = NodePath("../ViewmodelPivot/HandModel/LanternRig/LanternVisual/Orb")
 [node name="HandModel" parent="Head/Camera3D/ViewmodelPivot" unique_id=1766223943 instance=ExtResource("10")]
 transform = Transform3D(0.057969715, 0.02109925, -0.2474254, -0.08721513, 0.23962161, 0, 0.23250382, 0.08462447, 0.061690085, 0.125, -0.08, -0.142)
 
-[node name="tripo_node_1f408d7d-64a3-408f-9d0e-412c1ce13377" parent="Head/Camera3D/ViewmodelPivot/HandModel" index="0" unique_id=1117965979]
+[node name="tripo_node_1f408d7d-64a3-408f-9d0e-412c1ce13377" parent="Head/Camera3D/ViewmodelPivot/HandModel" index="0" unique_id=476485741]
 cast_shadow = 0
 
 [node name="LanternRig" type="Node3D" parent="Head/Camera3D/ViewmodelPivot/HandModel" unique_id=900000001]
@@ -138,7 +138,7 @@ script = ExtResource("7")
 [node name="LanternVisual" parent="Head/Camera3D/ViewmodelPivot/HandModel/LanternRig" unique_id=900000002 instance=ExtResource("9")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.9, -0.05)
 
-[node name="tripo_node_f9f5716a-0ba5-47e9-a458-76c967798b4b" parent="Head/Camera3D/ViewmodelPivot/HandModel/LanternRig/LanternVisual" index="0" unique_id=650789914]
+[node name="tripo_node_f9f5716a-0ba5-47e9-a458-76c967798b4b" parent="Head/Camera3D/ViewmodelPivot/HandModel/LanternRig/LanternVisual" index="0" unique_id=247479462]
 cast_shadow = 0
 
 [node name="Orb" type="Node3D" parent="Head/Camera3D/ViewmodelPivot/HandModel/LanternRig/LanternVisual" unique_id=155136458]

@@ -233,6 +233,7 @@ func _warm_scene(path: String) -> void:
 	if packed == null:
 		return
 	var inst := packed.instantiate()
+	_neutralize_for_warmup(inst)
 	_viewport.add_child(inst)
 	_force_particles_emitting(inst)
 
@@ -249,6 +250,33 @@ func _warm_scene(path: String) -> void:
 
 	inst.queue_free()
 	await get_tree().process_frame
+
+## This runs a full copy of every room scene live in the same SceneTree as
+## the actual game, mid-session, while the player may genuinely be standing
+## in one of those rooms right now -- own_world_3d only isolates rendering
+## and physics, not node identity. Left unneutralized, the copy carries the
+## exact same root node name AND the same zone groups as the real room, and
+## ZoneManager finds a room root by name (find_child) and a zone's fixtures
+## by group (get_nodes_in_group(zone_id)) -- either lookup can grab this
+## phantom copy instead of the real thing while it's briefly alive, which is
+## how a live re-warm (e.g. from the settings panel) was observed to leave
+## every room dark regardless of which one the player was actually in.
+##
+## Only the ROOT gets renamed -- ZoneManager's name collision risk is only
+## ever "a node named exactly like the zone", i.e. the room root, never an
+## arbitrary descendant. Renaming recursively broke this the first time: any
+## script using a relative $NodeName lookup (orb.gd's $Glass/$Light, for
+## instance) resolves against its own child's actual name, and renaming that
+## child out from under it null-crashed _ready() the moment the warmed copy
+## entered the tree. Group membership has no such name dependency, so that
+## part is still stripped from every descendant.
+func _neutralize_for_warmup(node: Node, is_root: bool = true) -> void:
+	if is_root:
+		node.name = "_warmup_%s" % node.name
+	for group in node.get_groups():
+		node.remove_from_group(group)
+	for child in node.get_children():
+		_neutralize_for_warmup(child, false)
 
 func _force_particles_emitting(node: Node) -> void:
 	if node is GPUParticles3D:

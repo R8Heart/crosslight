@@ -202,12 +202,40 @@ func _apply_room_visibility(zone_id: StringName) -> void:
 func _room_root(zone_id: StringName) -> Node3D:
 	if _room_roots.has(zone_id):
 		var cached = _room_roots[zone_id]
-		return cached if is_instance_valid(cached) else null
+		if is_instance_valid(cached):
+			return cached
+		# Falls through to re-search rather than returning null here: this
+		# used to return null forever once a cached root went invalid (e.g.
+		# a stale reference left behind by an old ShaderWarmup pass), even
+		# though the real room root was sitting right there the whole time.
+		_room_roots.erase(zone_id)
 	var found := get_tree().root.find_child(String(zone_id), true, false) as Node3D
 	if found == null:
 		push_warning("ZoneManager: no room root node named '%s' found -- that room will never be culled." % zone_id)
 	_room_roots[zone_id] = found
 	return found
+
+## Forces the zone the player is actually standing in back to fully lit and
+## fully visible, no fade, no sparks -- a safety net for anything that can
+## leave lighting/visibility in a wrong state without actually changing
+## current_zone (a live mid-game ShaderWarmup pass, for instance).
+## Deliberately re-applies over whatever state things are already in rather
+## than checking first, so it's always safe to call as a "just in case"
+## cleanup step. Does the same two things enter_zone() does for the current
+## zone -- re-show its cullable branches (walking through a real
+## ZoneTrigger, which calls the full enter_zone(), was confirmed to fix this
+## when just restoring light_energy/zone_dim alone did not, meaning a
+## hidden "lights"/"decor" branch container was the missing half) and
+## restore its fixtures' energy -- without the zone-id-changed early-out
+## enter_zone() has, since here the zone hasn't changed at all.
+func relight_current_zone() -> void:
+	if current_zone == &"":
+		return
+	_apply_room_visibility(current_zone)
+	for node in _find_dimmables(current_zone):
+		node.set(_dim_property(node), _lit_value(node))
+		if node is Light3D:
+			(node as Light3D).visible = true
 
 func _set_zone_lit(zone_id: StringName, lit: bool, use_sparks: bool = true) -> void:
 	var nodes := _find_dimmables(zone_id)

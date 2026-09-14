@@ -82,6 +82,7 @@ func _build_ui() -> void:
 
 	_main_panel = _build_main_panel()
 	_settings_panel = SettingsPanel.new()
+	_settings_panel.in_game = true
 	_settings_panel.visible = false
 	_settings_panel.back_pressed.connect(_show_main_panel)
 	root.add_child(_main_panel)

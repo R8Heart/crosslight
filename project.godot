@@ -61,6 +61,7 @@ laundromat=""
 armory_room=""
 coal_storage_room=""
 dishwashes_room=""
+buffet=""
 
 [gui]
 

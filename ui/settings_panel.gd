@@ -44,6 +44,19 @@ var _apply_graphics_button: Button
 ## equivalent for them.
 var _syncing := false
 
+## Set by the caller right after .new(), before adding this panel to the
+## tree -- true from the pause menu (a live game session already running),
+## false from the main menu (nothing running yet to disrupt). Anti-aliasing,
+## shadows on/off, shadow quality and moon shadow mode are the only four
+## settings ShaderWarmup._compute_fingerprint() actually keys on, i.e. the
+## only ones a change to can trigger a live re-warm -- and that re-warm was
+## the direct cause of the estate's room lighting breaking (fixable so far
+## only by physically re-crossing a ZoneTrigger). Simplest reliable fix
+## until that's actually solved: don't let a live game session touch these
+## four at all, only the main menu before anything is running.
+var in_game := false
+const _PIPELINE_LOCKED_TOOLTIP := "Меняется только из главного меню -- эта настройка пересобирает шейдеры сцены, что ломает освещение уже загруженной усадьбы."
+
 var _display_confirm: ConfirmationDialog
 var _display_confirm_timer: Timer
 var _display_confirm_seconds := 0
@@ -164,6 +177,7 @@ func _build_graphics_tab() -> VBoxContainer:
 	_aa_method_option.add_item("MSAA 4x", Settings.AAMethod.MSAA_4X)
 	_aa_method_option.add_item("TAA", Settings.AAMethod.TAA)
 	_aa_method_option.item_selected.connect(func(i): _apply_pipeline_setting(func(): Settings.set_aa_method(i)))
+	_lock_if_in_game(_aa_method_option)
 	tab.add_child(_row("Сглаживание", _aa_method_option))
 
 	tab.add_child(_slider_row("Яркость", 50, 150, 5, Settings.set_brightness, "brightness", 100.0, "%d%%"))
@@ -184,6 +198,7 @@ func _build_lighting_tab() -> VBoxContainer:
 	var shadows_check := CheckBox.new()
 	shadows_check.text = "Вкл"
 	shadows_check.toggled.connect(func(pressed): _apply_pipeline_setting(func(): Settings.set_shadows_enabled(pressed)))
+	_lock_if_in_game(shadows_check)
 	tab.add_child(_row("Тени", shadows_check))
 	_shadows_check = shadows_check
 
@@ -191,6 +206,7 @@ func _build_lighting_tab() -> VBoxContainer:
 	for label in ["Жёсткие (быстро)", "Мягкие: очень низкое", "Мягкие: низкое", "Мягкие: среднее", "Мягкие: высокое"]:
 		_shadow_filter_option.add_item(label)
 	_shadow_filter_option.item_selected.connect(func(i): _apply_pipeline_setting(func(): Settings.set_shadow_filter_quality(i)))
+	_lock_if_in_game(_shadow_filter_option)
 	tab.add_child(_row("Качество теней", _shadow_filter_option))
 
 	_moon_shadow_mode_option = OptionButton.new()
@@ -198,6 +214,7 @@ func _build_lighting_tab() -> VBoxContainer:
 	_moon_shadow_mode_option.add_item("PSSM 2 (средне)", 1)
 	_moon_shadow_mode_option.add_item("PSSM 4 (качественно)", 2)
 	_moon_shadow_mode_option.item_selected.connect(func(i): _apply_pipeline_setting(func(): Settings.set_moon_shadow_mode(i)))
+	_lock_if_in_game(_moon_shadow_mode_option)
 	tab.add_child(_row("Тень лунного света", _moon_shadow_mode_option))
 
 	tab.add_child(_slider_row("Дальность тени луны", 20, 300, 10, Settings.set_moon_shadow_max_distance, "moon_shadow_max_distance", 1.0, "%d м"))
@@ -279,6 +296,17 @@ func _label(text: String, big := false) -> Label:
 	if big:
 		l.add_theme_font_size_override("font_size", 22)
 	return l
+
+## Applied to the four ShaderWarmup-fingerprint controls only -- see `in_game`.
+## BaseButton, not Control: `disabled` is a BaseButton property (both
+## OptionButton and CheckBox are BaseButton subclasses), and GDScript's
+## static typing would flag it as unknown on the plain Control type.
+func _lock_if_in_game(control: BaseButton) -> void:
+	if not in_game:
+		return
+	control.disabled = true
+	control.tooltip_text = _PIPELINE_LOCKED_TOOLTIP
+	control.mouse_default_cursor_shape = Control.CURSOR_FORBIDDEN
 
 func _row(caption: String, control: Control) -> HBoxContainer:
 	var row := HBoxContainer.new()
@@ -426,7 +454,11 @@ func _apply_pipeline_setting(setter: Callable) -> void:
 
 func _update_apply_button() -> void:
 	if _apply_graphics_button:
-		_apply_graphics_button.visible = ShaderWarmup.needs_warmup()
+		# In-game, the four controls that could ever make needs_warmup() true
+		# are locked (see in_game/_lock_if_in_game) -- nothing left for this
+		# button to apply, so it never shows regardless of a stale true left
+		# over from before the game was entered.
+		_apply_graphics_button.visible = not in_game and ShaderWarmup.needs_warmup()
 
 func _run_live_warmup() -> void:
 	if _warmup_overlay != null:
@@ -476,6 +508,10 @@ func _run_live_warmup() -> void:
 
 	ShaderWarmup.run()
 	await ShaderWarmup.finished
+	# Belt-and-suspenders: whatever leaves room lighting wrong after a live
+	# mid-game warmup pass, just force the player's actual current zone back
+	# to fully lit rather than chase every possible cause of it going dark.
+	ZoneManager.relight_current_zone()
 
 	ShaderWarmup.progress.disconnect(on_progress)
 	_warmup_overlay.queue_free()
